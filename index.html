@@ -7,26 +7,81 @@
     <!-- 引入 Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* 此处省略原有样式，与之前完全相同，为了节省篇幅，但实际需包含完整样式 */
-        /* 您可以复制之前版本的完整样式，或者直接使用下方简化样式，但为了保证效果，建议使用之前版本的完整样式 */
-        /* 由于篇幅，我们暂时保留最简单样式，但您可以从之前回复中获取完整样式 */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: #f0f4f8; padding: 20px; }
-        .app-container { max-width: 1200px; margin: 0 auto; }
-        /* ... 其余样式请从之前的回答中复制 ... */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2b6cb0;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover { background: #1a4b7a; }
+        .error { color: red; font-size: 14px; }
+        .success { color: green; }
+        #projectList { margin-top: 20px; }
+        .project-item {
+            border: 1px solid #ddd;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <h1>📊 Deal Tracker <small>云端版</small></h1>
-        <div>
-            <button onclick="login()">登录</button>
-            <button onclick="logout()">登出</button>
-            <span id="userStatus">未登录</span>
+
+    <h1>📊 Deal Tracker</h1>
+
+    <!-- 登录/注册卡片 -->
+    <div id="authCard" class="card">
+        <h2>登录 / 注册</h2>
+        <div id="authError" class="error"></div>
+        <input type="email" id="emailInput" placeholder="邮箱地址" required>
+        <input type="password" id="passwordInput" placeholder="密码 (至少6位)" required>
+        <button id="loginBtn">登录</button>
+        <button id="registerBtn">注册新账号</button>
+        <div style="margin-top:10px;font-size:14px;color:#666;">
+            💡 注册后会自动登录，无需邮件验证。
         </div>
+    </div>
+
+    <!-- 用户信息和操作 -->
+    <div id="userCard" class="card hidden">
+        <div>👤 已登录: <span id="userEmail"></span></div>
+        <button id="logoutBtn">登出</button>
         <hr>
-        <button onclick="addProject()">新增项目</button>
-        <div id="projectList"></div>
+        <button id="addProjectBtn">＋ 新增项目</button>
+    </div>
+
+    <!-- 项目列表 -->
+    <div id="projectList" class="card hidden">
+        <h3>我的项目</h3>
+        <div id="projectsContainer"></div>
     </div>
 
     <script>
@@ -39,34 +94,75 @@
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null;
 
+        // DOM 元素
+        const authCard = document.getElementById('authCard');
+        const userCard = document.getElementById('userCard');
+        const projectList = document.getElementById('projectList');
+        const userEmail = document.getElementById('userEmail');
+        const projectsContainer = document.getElementById('projectsContainer');
+        const authError = document.getElementById('authError');
+
         // ============================================================
-        // 用户认证
+        // 认证函数
         // ============================================================
-        async function login() {
-            const email = prompt('请输入邮箱');
-            const password = prompt('请输入密码');
+        async function login(email, password) {
+            authError.textContent = '';
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) {
-                // 如果用户不存在，尝试注册
-                const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
-                if (signUpError) { alert('登录/注册失败：' + signUpError.message); return; }
-                alert('注册成功，请再次登录');
-                return;
+                authError.textContent = '登录失败：' + error.message;
+                return false;
             }
             currentUser = data.user;
-            document.getElementById('userStatus').textContent = '已登录: ' + currentUser.email;
+            showUserUI();
             loadProjects();
+            return true;
+        }
+
+        async function register(email, password) {
+            authError.textContent = '';
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            if (error) {
+                authError.textContent = '注册失败：' + error.message;
+                return false;
+            }
+            // 如果关闭了邮箱验证，注册后用户会自动登录
+            if (data.user) {
+                currentUser = data.user;
+                showUserUI();
+                loadProjects();
+                alert('注册成功！已自动登录。');
+                return true;
+            } else {
+                authError.textContent = '注册成功，但请检查邮箱验证（如果您开启了邮箱验证）。';
+                return false;
+            }
         }
 
         async function logout() {
             await supabase.auth.signOut();
             currentUser = null;
-            document.getElementById('userStatus').textContent = '未登录';
-            document.getElementById('projectList').innerHTML = '';
+            showAuthUI();
+            projectsContainer.innerHTML = '';
         }
 
         // ============================================================
-        // 数据操作
+        // UI 切换
+        // ============================================================
+        function showAuthUI() {
+            authCard.classList.remove('hidden');
+            userCard.classList.add('hidden');
+            projectList.classList.add('hidden');
+        }
+
+        function showUserUI() {
+            authCard.classList.add('hidden');
+            userCard.classList.remove('hidden');
+            projectList.classList.remove('hidden');
+            userEmail.textContent = currentUser.email;
+        }
+
+        // ============================================================
+        // 项目操作 (增删查)
         // ============================================================
         async function loadProjects() {
             if (!currentUser) return;
@@ -74,35 +170,46 @@
                 .from('projects')
                 .select('*')
                 .eq('user_id', currentUser.id);
-            if (error) { alert('加载失败：' + error.message); return; }
+            if (error) {
+                alert('加载项目失败：' + error.message);
+                return;
+            }
             renderProjects(data);
         }
 
         function renderProjects(projects) {
-            const container = document.getElementById('projectList');
-            container.innerHTML = projects.map(p => `
-                <div style="border:1px solid #ccc; margin:8px; padding:12px; border-radius:8px;">
+            if (!projects || projects.length === 0) {
+                projectsContainer.innerHTML = '<p style="color:#999;">暂无项目，点击“新增项目”添加。</p>';
+                return;
+            }
+            projectsContainer.innerHTML = projects.map(p => `
+                <div class="project-item">
                     <strong>${p.data.issuerName || '未命名'}</strong>
-                    <span style="margin-left:16px;">${p.data.status || '营销中'}</span>
-                    <button onclick="deleteProject('${p.id}')">删除</button>
-                    <button onclick="editProject('${p.id}')">编辑</button>
+                    <span style="margin-left:16px;color:#2b6cb0;">${p.data.status || '营销中'}</span>
+                    <div style="margin-top:6px;">
+                        <button onclick="deleteProject('${p.id}')">删除</button>
+                        <button onclick="editProject('${p.id}')">编辑</button>
+                    </div>
                 </div>
             `).join('');
         }
 
         async function addProject() {
             if (!currentUser) { alert('请先登录'); return; }
-            const name = prompt('请输入发行人名称');
+            const name = prompt('请输入发行人名称：');
             if (!name) return;
             const newProject = {
                 issuerName: name,
                 status: 'marketing',
-                // 其他字段可后续完善
+                // 其他字段可后续扩展
             };
             const { data, error } = await supabase
                 .from('projects')
                 .insert([{ user_id: currentUser.id, data: newProject }]);
-            if (error) { alert('添加失败：' + error.message); return; }
+            if (error) {
+                alert('添加失败：' + error.message);
+                return;
+            }
             loadProjects();
         }
 
@@ -112,38 +219,81 @@
                 .from('projects')
                 .delete()
                 .eq('id', id);
-            if (error) { alert('删除失败：' + error.message); return; }
+            if (error) {
+                alert('删除失败：' + error.message);
+                return;
+            }
             loadProjects();
         }
 
         async function editProject(id) {
-            // 简单编辑演示：修改状态
-            const newStatus = prompt('输入新状态（marketing/mandated/completed）', 'marketing');
+            // 简单编辑：修改状态
+            const newStatus = prompt('输入新状态（marketing / mandated / completed）', 'marketing');
             if (!newStatus) return;
-            // 先从数据库获取当前项目数据
+            // 获取当前数据
             const { data, error } = await supabase
                 .from('projects')
                 .select('data')
                 .eq('id', id)
                 .single();
-            if (error) { alert('获取失败：' + error.message); return; }
+            if (error) {
+                alert('获取项目失败：' + error.message);
+                return;
+            }
             const projectData = data.data;
             projectData.status = newStatus;
             const { error: updateError } = await supabase
                 .from('projects')
                 .update({ data: projectData })
                 .eq('id', id);
-            if (updateError) { alert('更新失败：' + updateError.message); return; }
+            if (updateError) {
+                alert('更新失败：' + updateError.message);
+                return;
+            }
             loadProjects();
         }
 
-        // 页面加载时检查是否已登录
+        // ============================================================
+        // 事件绑定
+        // ============================================================
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            if (!email || !password) {
+                authError.textContent = '请输入邮箱和密码';
+                return;
+            }
+            login(email, password);
+        });
+
+        document.getElementById('registerBtn').addEventListener('click', () => {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            if (!email || !password) {
+                authError.textContent = '请输入邮箱和密码';
+                return;
+            }
+            if (password.length < 6) {
+                authError.textContent = '密码至少6位';
+                return;
+            }
+            register(email, password);
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('addProjectBtn').addEventListener('click', addProject);
+
+        // ============================================================
+        // 初始化：检查已有会话
+        // ============================================================
         window.onload = async function() {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 currentUser = session.user;
-                document.getElementById('userStatus').textContent = '已登录: ' + currentUser.email;
+                showUserUI();
                 loadProjects();
+            } else {
+                showAuthUI();
             }
         };
     </script>
