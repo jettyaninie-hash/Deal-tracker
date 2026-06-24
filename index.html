@@ -3,344 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deal Tracker - 云端版 (修复)</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js">
-    </script>
+    <title>Deal Tracker - 完整版</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #f0f4f8;
-            padding: 20px;
-            color: #1a202c;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            margin-bottom: 20px;
-        }
-        .auth-card {
-            max-width: 400px;
-            margin: 40px auto;
-        }
-        .auth-card input {
-            width: 100%;
-            padding: 10px 14px;
-            margin: 8px 0 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        .auth-card button {
-            width: 100%;
-            padding: 12px;
-            background: #2b6cb0;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .auth-card button:hover {
-            background: #1a4b7a;
-        }
-        .auth-card .btn-secondary {
-            background: transparent;
-            color: #2b6cb0;
-            border: 2px solid #2b6cb0;
-            margin-top: 8px;
-        }
-        .auth-card .btn-secondary:hover {
-            background: #ebf8ff;
-        }
-        .auth-card .error {
-            color: #e53e3e;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-        .auth-card .success {
-            color: #38a169;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .app-header h1 {
-            font-size: 28px;
-            color: #2b6cb0;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .btn {
-            padding: 8px 20px;
-            border: none;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-primary {
-            background: #f6ad55;
-            color: #1a202c;
-        }
-        .btn-primary:hover {
-            background: #ed8936;
-        }
-        .btn-danger {
-            background: #fc8181;
-            color: white;
-        }
-        .btn-danger:hover {
-            background: #f56565;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #2b6cb0;
-            color: #2b6cb0;
-        }
-        .btn-outline:hover {
-            background: #ebf8ff;
-        }
-        .btn-sm {
-            padding: 4px 12px;
-            font-size: 12px;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .project-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            background: #f7fafc;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border-left: 4px solid #2b6cb0;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .project-item:hover {
-            background: #edf2f7;
-        }
-        .project-item .name {
-            font-weight: 600;
-            color: #2b6cb0;
-        }
-        .project-item .status {
-            font-size: 13px;
-            padding: 2px 12px;
-            border-radius: 20px;
-            background: #e2e8f0;
-        }
-        .project-item .status.marketing {
-            background: #bee3f8;
-            color: #2a4365;
-        }
-        .project-item .status.mandated {
-            background: #fefcbf;
-            color: #744210;
-        }
-        .project-item .status.completed {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-        .project-item .actions button {
-            margin-left: 6px;
-        }
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .modal-overlay.active {
-            display: flex;
-        }
-        .modal {
-            background: white;
-            border-radius: 20px;
-            max-width: 800px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 32px;
-        }
-        .modal .close-btn {
-            float: right;
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: #a0aec0;
-        }
-        .modal .close-btn:hover {
-            color: #e53e3e;
-        }
-        .modal h2 {
-            margin-bottom: 20px;
-        }
-        .modal .form-group {
-            margin-bottom: 16px;
-        }
-        .modal .form-group label {
-            display: block;
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-        .modal .form-group input,
-        .modal .form-group textarea,
-        .modal .form-group select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        .modal .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 24px;
-            padding-top: 16px;
-            border-top: 1px solid #edf2f7;
-        }
-        .detail-panel {
-            padding: 16px;
-            background: #f7fafc;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        .detail-panel .field-row {
-            display: flex;
-            padding: 4px 0;
-        }
-        .detail-panel .field-row .label {
-            font-weight: 500;
-            min-width: 100px;
-            color: #4a5568;
-        }
-        .detail-panel .field-row .value {
-            color: #1a202c;
-        }
-        .stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        .stats .stat-card {
-            background: white;
-            padding: 12px 24px;
-            border-radius: 12px;
-            flex: 1;
-            min-width: 100px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
-        @media (max-width: 640px) {
-            .app-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-        }
+        /* ===== 完整样式 ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f0f4f8; color: #1a202c; padding: 20px; min-height: 100vh; }
+        .app-container { max-width: 1440px; margin: 0 auto; }
+        .app-header { background: linear-gradient(135deg, #1a365d, #2b6cb0); color: white; padding: 20px 30px; border-radius: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(26,54,93,0.25); }
+        .app-header h1 { font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .app-header h1 small { font-size: 14px; font-weight: 400; opacity: 0.75; margin-left: 8px; }
+        .header-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .header-actions .search-box { display: flex; align-items: center; background: rgba(255,255,255,0.15); border-radius: 30px; padding: 0 16px; transition: background 0.2s; }
+        .header-actions .search-box:focus-within { background: rgba(255,255,255,0.25); }
+        .header-actions .search-box input { background: transparent; border: none; padding: 10px 8px; color: white; font-size: 14px; width: 180px; outline: none; }
+        .header-actions .search-box input::placeholder { color: rgba(255,255,255,0.6); }
+        .header-actions .search-box svg { width: 18px; height: 18px; fill: rgba(255,255,255,0.6); flex-shrink: 0; }
+        .header-actions select { padding: 8px 16px; border-radius: 30px; border: none; background: rgba(255,255,255,0.2); color: white; font-size: 14px; font-weight: 500; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+        .header-actions select option { background: #2d3748; color: white; }
+        .header-actions select:hover { background: rgba(255,255,255,0.3); }
+        .btn { padding: 10px 24px; border: none; border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+        .btn-primary { background: #f6ad55; color: #1a202c; }
+        .btn-primary:hover { background: #ed8936; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(237,137,54,0.35); }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-success:hover { background: #38a169; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(56,161,105,0.35); }
+        .btn-danger { background: #fc8181; color: white; }
+        .btn-danger:hover { background: #f56565; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(245,101,101,0.35); }
+        .btn-outline { background: transparent; color: #2b6cb0; border: 2px solid #2b6cb0; }
+        .btn-outline:hover { background: #2b6cb0; color: white; }
+        .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 20px; }
+        .btn-xs { padding: 4px 12px; font-size: 11px; border-radius: 16px; }
+        .btn-ghost { background: transparent; color: #4a5568; }
+        .btn-ghost:hover { background: #edf2f7; }
+        .stats-bar { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+        .stat-item { background: white; padding: 12px 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+        .stat-item .label { font-size: 13px; color: #718096; }
+        .stat-item .value { font-size: 22px; font-weight: 700; color: #2b6cb0; }
+        .reminder-bar { background: #fff5f5; border: 2px solid #fc8181; border-radius: 16px; padding: 12px 24px; margin-bottom: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+        .reminder-bar .reminder-title { font-weight: 700; color: #c53030; display: flex; align-items: center; gap: 8px; }
+        .reminder-bar .reminder-list { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+        .reminder-bar .reminder-item { background: white; padding: 4px 14px; border-radius: 20px; font-size: 13px; border: 1px solid #fed7d7; color: #2d3748; }
+        .reminder-bar .reminder-item .issuer { font-weight: 600; color: #2b6cb0; }
+        .project-list { background: white; border-radius: 16px; box-shadow: 0 1px 10px rgba(0,0,0,0.06); overflow: hidden; }
+        .project-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .project-table th { background: #f7fafc; text-align: left; padding: 14px 18px; font-weight: 600; color: #4a5568; border-bottom: 2px solid #e2e8f0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+        .project-table td { padding: 14px 18px; border-bottom: 1px solid #edf2f7; vertical-align: middle; }
+        .project-table tr.project-row { cursor: pointer; transition: background 0.15s; }
+        .project-table tr.project-row:hover { background: #f7fafc; }
+        .project-table tr.project-row.expanded { background: #ebf8ff; }
+        .project-table .issuer-name { font-weight: 600; color: #2b6cb0; }
+        .project-table .badge { display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; background: #e2e8f0; color: #2d3748; }
+        .badge-aaa { background: #c6f6d5; color: #22543d; }
+        .badge-aa { background: #bee3f8; color: #2a4365; }
+        .badge-a { background: #fefcbf; color: #744210; }
+        .badge-bbb { background: #feebc8; color: #7b341e; }
+        .badge-status { background: #e2e8f0; color: #2d3748; }
+        .badge-status.marketing { background: #bee3f8; color: #2a4365; }
+        .badge-status.mandated { background: #fefcbf; color: #744210; }
+        .badge-status.completed { background: #c6f6d5; color: #22543d; }
+        .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+        .row-actions .btn { padding: 4px 10px; font-size: 12px; border-radius: 16px; }
+        .detail-row { display: none; background: #fafcff; }
+        .detail-row.open { display: table-row; }
+        .detail-cell { padding: 20px 24px !important; border-bottom: 2px solid #e2e8f0; }
+        .detail-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .detail-content .full-width { grid-column: 1 / -1; }
+        .detail-section { background: white; border-radius: 12px; padding: 16px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); border: 1px solid #edf2f7; }
+        .detail-section h4 { font-size: 14px; font-weight: 600; color: #2b6cb0; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #edf2f7; padding-bottom: 8px; }
+        .detail-section h4 .badge-count { font-size: 12px; font-weight: 400; color: #718096; background: #edf2f7; padding: 0 10px; border-radius: 12px; }
+        .field-row { display: flex; padding: 4px 0; font-size: 14px; }
+        .field-row .label { font-weight: 500; color: #4a5568; min-width: 100px; flex-shrink: 0; }
+        .field-row .value { color: #1a202c; word-break: break-word; }
+        .record-list { max-height: 220px; overflow-y: auto; margin-top: 6px; }
+        .record-item { padding: 10px 12px; background: #f7fafc; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #bee3f8; font-size: 13px; }
+        .record-item .record-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 12px; color: #718096; }
+        .record-item .record-meta .record-time { font-weight: 500; color: #2b6cb0; }
+        .record-item .record-meta .record-attendees { color: #4a5568; }
+        .record-item .record-content { color: #2d3748; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+        .record-item .record-delete { color: #fc8181; cursor: pointer; font-size: 12px; font-weight: 500; background: none; border: none; padding: 2px 6px; border-radius: 4px; }
+        .record-item .record-delete:hover { color: #e53e3e; background: #fff5f5; }
+        .add-record-btn { margin-top: 8px; width: 100%; padding: 8px; border: 2px dashed #bee3f8; background: transparent; border-radius: 8px; color: #2b6cb0; font-size: 13px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .add-record-btn:hover { background: #ebf8ff; border-color: #2b6cb0; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #a0aec0; }
+        .empty-state svg { width: 64px; height: 64px; fill: #cbd5e0; margin-bottom: 16px; }
+        .empty-state h3 { font-size: 20px; color: #4a5568; margin-bottom: 8px; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.2s ease; }
+        .modal-overlay.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+        .modal { background: white; border-radius: 20px; max-width: 960px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 32px 36px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; }
+        .modal .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 28px; color: #a0aec0; cursor: pointer; transition: color 0.15s; line-height: 1; }
+        .modal .modal-close:hover { color: #e53e3e; }
+        .modal h2 { font-size: 22px; font-weight: 700; color: #1a202c; margin-bottom: 24px; padding-right: 40px; }
+        .modal .form-group { margin-bottom: 18px; }
+        .modal .form-group label { display: block; font-weight: 600; font-size: 14px; color: #4a5568; margin-bottom: 4px; }
+        .modal .form-group label .required { color: #e53e3e; margin-left: 2px; }
+        .modal .form-group input, .modal .form-group textarea, .modal .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; transition: border 0.2s; background: #f7fafc; font-family: inherit; }
+        .modal .form-group input:focus, .modal .form-group textarea:focus, .modal .form-group select:focus { outline: none; border-color: #2b6cb0; background: white; box-shadow: 0 0 0 3px rgba(43,108,176,0.15); }
+        .modal .form-group textarea { min-height: 60px; resize: vertical; }
+        .modal .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .modal .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid #edf2f7; }
+        .modal .form-actions .btn { padding: 10px 32px; }
+        .sub-item { background: #f7fafc; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; border-left: 3px solid #2b6cb0; }
+        .sub-item .info { flex: 1; min-width: 150px; font-size: 13px; }
+        .sub-item .info strong { color: #2b6cb0; }
+        .sub-item .btn { padding: 2px 12px; font-size: 11px; }
+        .add-sub-btn { margin-top: 6px; padding: 6px 14px; border: 2px dashed #bee3f8; background: transparent; border-radius: 8px; color: #2b6cb0; font-size: 13px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .add-sub-btn:hover { background: #ebf8ff; border-color: #2b6cb0; }
+        .file-upload-wrapper { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .file-upload-wrapper input[type="file"] { flex: 1; padding: 8px; border: 2px solid #e2e8f0; border-radius: 8px; background: #f7fafc; font-size: 13px; }
+        .mt-8 { margin-top: 8px; }
+        .hidden { display: none; }
+        .check-group { display: flex; flex-wrap: wrap; gap: 12px; }
+        .check-group label { font-weight: 400; display: flex; align-items: center; gap: 4px; }
+        .check-group label input[type="checkbox"] { width: auto; margin-right: 4px; }
+        .quarter-select { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .quarter-select input, .quarter-select select { width: auto; padding: 6px 12px; border: 2px solid #e2e8f0; border-radius: 8px; background: #f7fafc; font-size: 14px; }
+        .note-column { max-width: 280px; font-size: 13px; color: #4a5568; }
+        .note-column .note-content { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+        .data-toolbar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+        @media (max-width: 1024px) { .detail-content { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { body { padding: 12px; } .app-header { flex-direction: column; align-items: stretch; gap: 16px; padding: 16px 20px; } .app-header h1 { font-size: 20px; } .header-actions { flex-direction: column; align-items: stretch; } .header-actions .search-box input { width: 100%; } .project-table { font-size: 13px; } .project-table th, .project-table td { padding: 10px 12px; } .project-table .hide-mobile { display: none; } .detail-cell { padding: 16px !important; } .modal { padding: 24px 18px; } .modal .form-row { grid-template-columns: 1fr; } .stats-bar .stat-item { flex: 1 1 calc(50% - 8px); justify-content: center; } .field-row { flex-direction: column; padding: 6px 0; } .field-row .label { min-width: auto; font-size: 12px; color: #718096; } .reminder-bar { flex-direction: column; align-items: stretch; } .note-column { max-width: 120px; } }
+        @media (max-width: 480px) { .stats-bar .stat-item { flex: 1 1 100%; } .project-table th, .project-table td { padding: 8px 10px; font-size: 12px; } .row-actions .btn { padding: 2px 8px; font-size: 10px; } .note-column { max-width: 80px; } }
+        .text-truncate { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+        .auth-card { max-width: 400px; margin: 40px auto; padding: 30px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .auth-card h2 { text-align: center; margin-bottom: 20px; }
+        .auth-card input { width: 100%; padding: 12px; margin: 8px 0 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; }
+        .auth-card button { width: 100%; padding: 12px; background: #2b6cb0; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .auth-card .btn-secondary { background: transparent; color: #2b6cb0; border: 2px solid #2b6cb0; margin-top: 8px; }
+        .auth-card .btn-secondary:hover { background: #ebf8ff; }
+        .auth-card .error { color: #e53e3e; font-size: 14px; margin-bottom: 12px; }
+        .auth-card .success { color: #38a169; font-size: 14px; margin-bottom: 12px; }
+        .hidden { display: none !important; }
+        .user-info { display: flex; align-items: center; gap: 12px; color: white; }
     </style>
 </head>
 <body>
-    <div class="container">
+<div class="app-container" id="app">
 
-        <!-- 认证卡片 -->
-        <div id="authCard" class="card auth-card">
-            <h2 style="text-align:center; margin-bottom:20px;">🔐 登录 / 注册</h2>
-            <div id="authError" class="error"></div>
-            <div id="authSuccess" class="success"></div>
-            <input type="email" id="emailInput" placeholder="邮箱地址" required>
-            <input type="password" id="passwordInput" placeholder="密码 (至少6位)" required>
-            <button id="loginBtn">登录</button>
-            <button id="registerBtn" class="btn-secondary">注册新账号</button>
-            <p style="text-align:center; font-size:13px; color:#718096; margin-top:12px;">
-                💡 注册后会自动登录（需关闭邮箱验证）
-            </p>
-        </div>
+    <!-- 认证卡片 -->
+    <div id="authCard" class="auth-card">
+        <h2>🔐 登录 / 注册</h2>
+        <div id="authError" class="error"></div>
+        <div id="authSuccess" class="success"></div>
+        <input type="email" id="emailInput" placeholder="邮箱地址" required>
+        <input type="password" id="passwordInput" placeholder="密码 (至少6位)" required>
+        <button id="loginBtn">登录</button>
+        <button id="registerBtn" class="btn-secondary">注册新账号</button>
+        <p style="text-align:center; font-size:13px; color:#718096; margin-top:12px;">💡 注册后会自动登录（需关闭邮箱验证）</p>
+    </div>
 
-        <!-- 主界面 -->
-        <div id="appMain" class="hidden">
-            <div class="app-header">
-                <h1>📊 Deal Tracker</h1>
-                <div class="user-info">
-                    <span id="userEmailDisplay" style="font-weight:500;"></span>
-                    <button id="logoutBtn" class="btn btn-danger btn-sm">登出</button>
+    <!-- 主界面 -->
+    <div id="appMain" class="hidden">
+        <!-- 顶栏 -->
+        <header class="app-header">
+            <h1>📊 Deal Tracker <small>完整版</small></h1>
+            <div class="header-actions">
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <input type="text" id="searchInput" placeholder="搜索发行人..." oninput="renderProjects()">
                 </div>
-            </div>
-
-            <div class="stats">
-                <div class="stat-card"><span>总项目</span><br><strong id="totalCount">0</strong></div>
-                <div class="stat-card"><span>📢 营销中</span><br><strong id="marketingCount">0</strong></div>
-                <div class="stat-card"><span>📌 委任中</span><br><strong id="mandatedCount">0</strong></div>
-                <div class="stat-card"><span>✅ 已完成</span><br><strong id="completedCount">0</strong></div>
-            </div>
-
-            <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                <select id="statusFilter" onchange="renderProjects()">
+                    <option value="all">全部状态</option>
+                    <option value="marketing">营销中</option>
+                    <option value="mandated">委任中</option>
+                    <option value="completed">已完成</option>
+                </select>
+                <select id="sortOrder" onchange="renderProjects()">
+                    <option value="asc">时间升序</option>
+                    <option value="desc">时间降序</option>
+                </select>
                 <button class="btn btn-primary" onclick="openAddModal()">＋ 新增项目</button>
                 <button class="btn btn-outline btn-sm" onclick="exportData()">📤 导出数据</button>
-                <button class="btn btn-outline btn-sm" onclick="document.getElementById('importFile').click()">📥 导入数据</button>
-                <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
-                <input type="text" id="searchInput" placeholder="🔍 搜索发行人..." style="flex:1; padding:8px 14px; border:2px solid #e2e8f0; border-radius:30px; font-size:14px;" oninput="renderProjects()">
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('importFileInput').click()">📥 导入数据</button>
+                <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importData(event)">
+                <span id="userDisplay" style="color:white;font-weight:500;margin-left:12px;"></span>
+                <button class="btn btn-sm btn-danger" id="logoutBtn" onclick="logout()" style="display:none;">登出</button>
             </div>
+        </header>
 
-            <div class="card" id="projectsContainer"></div>
+        <!-- 统计栏 -->
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-item"><span class="label">📋 总项目</span><span class="value" id="totalCount">0</span></div>
+            <div class="stat-item"><span class="label">📢 营销中</span><span class="value" id="marketingCount">0</span></div>
+            <div class="stat-item"><span class="label">📌 委任中</span><span class="value" id="mandatedCount">0</span></div>
+            <div class="stat-item"><span class="label">✅ 已完成</span><span class="value" id="completedCount">0</span></div>
+            <div id="regionStats" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
         </div>
 
-        <!-- 模态框：新增/编辑 -->
-        <div id="projectModal" class="modal-overlay">
-            <div class="modal">
-                <button class="close-btn" onclick="closeModal('projectModal')">&times;</button>
-                <h2 id="modalTitle">新增项目</h2>
-                <form id="projectForm" onsubmit="saveProject(event)">
-                    <input type="hidden" id="editId" value="">
+        <!-- 提醒栏 -->
+        <div id="reminderBar" class="reminder-bar" style="display:none;">
+            <div class="reminder-title">⏰ 提醒</div>
+            <div class="reminder-list" id="reminderList"></div>
+        </div>
+
+        <!-- Bloomberg 上传提醒 -->
+        <div id="bloombergReminder" style="display:none; background:#fefcbf; border:2px solid #f6ad55; border-radius:16px; padding:12px 24px; margin-bottom:24px;">
+            <span style="font-weight:700; color:#744210;">📢 每半年提醒：请上传 Bloomberg 未来两年到期信息</span>
+            <button class="btn btn-sm btn-primary" onclick="recordBloombergUpload()" style="margin-left:16px;">我已上传</button>
+            <span id="bloombergLastUpload" style="margin-left:16px; font-size:13px; color:#744210;"></span>
+        </div>
+
+        <!-- 上传 Bloomberg Excel -->
+        <div style="background:white; border-radius:16px; padding:16px 24px; margin-bottom:24px; box-shadow:0 1px 10px rgba(0,0,0,0.06); display:flex; flex-wrap:wrap; align-items:center; gap:16px;">
+            <span style="font-weight:600; color:#2b6cb0;">📥 导入 Bloomberg 到期数据</span>
+            <div class="file-upload-wrapper">
+                <input type="file" id="excelFileInput" accept=".xlsx,.xls" onchange="handleExcelUpload(event)">
+                <button class="btn btn-success btn-sm" onclick="document.getElementById('excelFileInput').click()">选择文件</button>
+                <span id="uploadStatus" style="font-size:13px; color:#718096;"></span>
+            </div>
+            <span style="font-size:13px; color:#a0aec0;">支持 .xlsx / .xls，按发行人名称匹配更新“最近到期项目”</span>
+        </div>
+
+        <!-- 项目列表 -->
+        <div class="project-list">
+            <table class="project-table" id="projectTable">
+                <thead>
+                    <tr>
+                        <th style="width:14%;">发行人</th>
+                        <th style="width:8%;">行业</th>
+                        <th style="width:9%;">外部评级</th>
+                        <th style="width:9%;">内部评级</th>
+                        <th style="width:10%;">状态</th>
+                        <th style="width:34%;">备注</th>
+                        <th style="width:16%;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="projectBody"></tbody>
+            </table>
+        </div>
+        <div id="emptyState" class="empty-state" style="display:none; margin-top:30px;">
+            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <h3>没有找到项目</h3>
+            <p style="color:#a0aec0;">尝试调整筛选条件或点击「新增项目」</p>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 主模态框 (包含所有字段) -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="projectModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('projectModal')">×</button>
+            <h2 id="projectModalTitle">新增项目</h2>
+            <form id="projectForm" onsubmit="saveProject(event)">
+                <input type="hidden" id="editId" value="">
+
+                <!-- 状态选择器 -->
+                <div class="form-group">
+                    <label>项目状态 <span class="required">*</span></label>
+                    <select id="fStatus" onchange="onStatusChange()" required>
+                        <option value="marketing">营销中</option>
+                        <option value="mandated">委任中</option>
+                        <option value="completed">已完成</option>
+                    </select>
+                </div>
+
+                <!-- 基本信息 -->
+                <div class="form-group">
+                    <label>发行人姓名 <span class="required">*</span></label>
+                    <input type="text" id="fIssuerName" placeholder="例如：万科企业股份有限公司" required>
+                </div>
+                <div class="form-row">
                     <div class="form-group">
-                        <label>状态</label>
-                        <select id="fStatus">
-                            <option value="marketing">营销中</option>
-                            <option value="mandated">委任中</option>
-                            <option value="completed">已完成</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>发行人名称 *</label>
-                        <input type="text" id="fIssuerName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>行业</label>
-                        <select id="fIndustry">
-                            <option value="其他">其他</option>
+                        <label>行业 <span class="required">*</span></label>
+                        <select id="fIndustry" required>
                             <option value="房地产">房地产</option>
                             <option value="建筑">建筑</option>
                             <option value="能源">能源</option>
@@ -349,503 +276,1938 @@
                             <option value="制造">制造</option>
                             <option value="消费">消费</option>
                             <option value="医疗">医疗</option>
+                            <option value="其他">其他</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>外部评级</label>
-                        <input type="text" id="fExternalRating" placeholder="AAA / AA+">
+                        <label>地区</label>
+                        <select id="fRegion">
+                            <option value="中国内地">中国内地</option>
+                            <option value="香港">香港</option>
+                            <option value="美国">美国</option>
+                            <option value="欧洲">欧洲</option>
+                            <option value="大洋洲">大洋洲</option>
+                            <option value="东南亚">东南亚</option>
+                            <option value="中亚">中亚</option>
+                        </select>
                     </div>
-                    <div class="form-group">
-                        <label>内部评级</label>
-                        <input type="text" id="fBankRating" placeholder="AAA / AA+">
-                    </div>
-                    <div class="form-group">
-                        <label>近期债券发行</label>
-                        <input type="text" id="fRecentBond" placeholder="如：2024年公司债20亿元">
-                    </div>
-                    <div class="form-group">
-                        <label>最近到期项目</label>
-                        <input type="text" id="fRecentMaturity" placeholder="如：2023年公司债15亿元 2024-12-20">
-                    </div>
-                    <div class="form-group">
-                        <label>预计发行规模</label>
-                        <input type="text" id="fExpectedScale" placeholder="如：20亿元">
-                    </div>
-                    <div class="form-group">
-                        <label>额度情况</label>
-                        <input type="text" id="fCreditLimit" placeholder="可用额度 50 亿元">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-outline" onclick="closeModal('projectModal')">取消</button>
-                        <button type="submit" class="btn btn-primary">保存</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                </div>
 
-        <!-- 模态框：详情 -->
-        <div id="detailModal" class="modal-overlay">
-            <div class="modal">
-                <button class="close-btn" onclick="closeModal('detailModal')">&times;</button>
-                <h2>项目详情</h2>
-                <div id="detailContent"></div>
-            </div>
-        </div>
+                <div class="form-group">
+                    <label>担保情况</label>
+                    <select id="fHasGuarantee" onchange="toggleGuaranteeDetails()">
+                        <option value="0">无担保</option>
+                        <option value="1">有担保</option>
+                    </select>
+                </div>
+                <div id="guaranteeDetails" style="display:none; border-left:3px solid #2b6cb0; padding-left:16px; margin-bottom:12px;">
+                    <div class="form-group"><label>担保人名称</label><input type="text" id="fGuarantorName" placeholder="担保人全称"></div>
+                    <div class="form-group"><label>与发行机构关系</label><input type="text" id="fGuarantorRelation" placeholder="例如：母公司、关联公司"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>担保人外部评级</label><input type="text" id="fGuarantorExternal" placeholder="AAA / AA+"></div>
+                        <div class="form-group"><label>担保人内部评级</label><input type="text" id="fGuarantorInternal" placeholder="AAA / AA+"></div>
+                    </div>
+                </div>
 
+                <div class="form-group">
+                    <label>预计发行规模</label>
+                    <input type="text" id="fExpectedScale" placeholder="例如：20亿元">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>所属处室</label><input type="text" id="fDepartment" placeholder="例如：投行部"></div>
+                    <div class="form-group"><label>主要前线</label><input type="text" id="fFrontLine" placeholder="例如：华东区"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>主管姓名</label><input type="text" id="fSupervisorName" placeholder="张三"></div>
+                    <div class="form-group"><label>主管电话</label><input type="text" id="fSupervisorPhone" placeholder="138-0000-0000"></div>
+                </div>
+                <div class="form-group">
+                    <label>亮点 (项目亮点描述)</label>
+                    <input type="text" id="fHighlights" placeholder="例如：绿色债券、首单等">
+                </div>
+                <div class="form-group">
+                    <label>近期债券发行情况</label>
+                    <input type="text" id="fRecentBond" placeholder="例如：2024年公司债（第一期）20亿元">
+                </div>
+                <div class="form-group">
+                    <label>最近到期项目</label>
+                    <input type="text" id="fRecentMaturity" placeholder="例如：2023年公司债（第二期）15亿元 2024-12-20">
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>外部评级</label><input type="text" id="fExternalRating" placeholder="AAA / AA+ / AA-"></div>
+                    <div class="form-group"><label>内部评级</label><input type="text" id="fBankRating" placeholder="AAA / AA+ / AA"></div>
+                </div>
+                <div class="form-group">
+                    <label>额度情况</label>
+                    <input type="text" id="fCreditLimit" placeholder="可用额度 50 亿元">
+                </div>
+
+                <!-- ===== 投资意向（营销和委任均显示） ===== -->
+                <div id="investmentIntentSection" style="display:none; border-top:2px dashed #e2e8f0; padding-top:16px; margin-top:8px;">
+                    <h4 style="margin-bottom:8px; color:#2b6cb0;">📊 投资意向 (多条)</h4>
+                    <div id="investmentIntentsContainer"></div>
+                    <button type="button" class="add-sub-btn" onclick="addInvestmentIntent()">＋ 添加投资意向</button>
+                </div>
+
+                <!-- ===== 委任中 ===== -->
+                <div id="mandateSection" style="display:none; border-top:2px dashed #e2e8f0; padding-top:16px; margin-top:8px;">
+                    <h4 style="margin-bottom:8px; color:#2b6cb0;">📌 委任详细信息</h4>
+                    <div class="form-group">
+                        <label>是否为 BnD 银行</label>
+                        <select id="fBnDStatus">
+                            <option value="no">否</option>
+                            <option value="yes">是</option>
+                            <option value="pending">待定</option>
+                        </select>
+                    </div>
+                    <div id="uwbSection" style="display:none; border-left:3px solid #9f7aea; padding-left:16px; margin-bottom:12px;">
+                        <div class="form-group"><label>UWB 额度</label><input type="text" id="fUwbLimit" placeholder="例如：10亿元"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>承销商 (角色: JGC, JBR, Co Manager)</label>
+                        <div id="underwritersContainer"></div>
+                        <button type="button" class="add-sub-btn" onclick="addUnderwriter()">＋ 添加承销商</button>
+                    </div>
+                    <div class="form-group">
+                        <label>预计发行时间更新记录</label>
+                        <div id="mandateUpdatesContainer"></div>
+                        <button type="button" class="add-sub-btn" onclick="addMandateUpdate()">＋ 添加更新</button>
+                    </div>
+                    <div class="form-group">
+                        <label>债券列表 (规模 / 货币 / 年期)</label>
+                        <div id="bondsContainer"></div>
+                        <button type="button" class="add-sub-btn" onclick="addBond()">＋ 添加债券</button>
+                    </div>
+                    <div class="form-group">
+                        <label>工作进度更新</label>
+                        <div id="progressUpdatesContainer"></div>
+                        <button type="button" class="add-sub-btn" onclick="addProgressUpdate()">＋ 添加进度更新</button>
+                    </div>
+                    <div id="marketingHistoryContainer" style="display:none; border-top:1px solid #e2e8f0; margin-top:12px; padding-top:12px;">
+                        <h5 style="color:#4a5568;">📢 历史营销信息</h5>
+                        <div id="marketingHistoryContent"></div>
+                    </div>
+                </div>
+
+                <!-- ===== 已完成 ===== -->
+                <div id="completedSection" style="display:none; border-top:2px dashed #e2e8f0; padding-top:16px; margin-top:8px;">
+                    <h4 style="margin-bottom:8px; color:#2b6cb0;">✅ 完成定价信息</h4>
+                    <div class="form-group">
+                        <label>定价日期</label>
+                        <input type="date" id="fPricingDate">
+                    </div>
+                    <div class="form-group">
+                        <label>定价信息</label>
+                        <input type="text" id="fPricingInfo" placeholder="例如：票面利率 3.2%，发行价格 100元">
+                    </div>
+                    <div class="form-group">
+                        <label>是否宣传</label>
+                        <select id="fIsPromoted" onchange="togglePromotionSection()">
+                            <option value="0">否</option>
+                            <option value="1">是</option>
+                        </select>
+                    </div>
+                    <div id="promotionSection" style="display:none; border-left:3px solid #48bb78; padding-left:16px; margin-bottom:12px;">
+                        <label>宣传记录 (渠道 + 内容)</label>
+                        <div id="promotionRecordsContainer"></div>
+                        <button type="button" class="add-sub-btn" onclick="addPromotionRecord()">＋ 添加宣传记录</button>
+                    </div>
+                    <div class="form-group">
+                        <label>收款行情况</label>
+                        <input type="text" id="fReceivingBank" placeholder="收款行名称及账户信息">
+                    </div>
+                    <div class="form-group">
+                        <label>中国银行投资情况 (可添加多个投资主体)</label>
+                        <div id="bocInvestmentContainer"></div>
+                        <button type="button" class="add-sub-btn" onclick="addBocInvestment()">＋ 添加投资主体</button>
+                    </div>
+                    <div class="form-group" id="completedBndSection" style="display:none; border-top:1px solid #e2e8f0; padding-top:12px;">
+                        <h5 style="color:#4a5568;">📌 委任时 BnD 信息 (可修改)</h5>
+                        <div class="form-row">
+                            <div class="form-group"><label>BnD 状态</label>
+                                <select id="fCompletedBndStatus">
+                                    <option value="no">否</option>
+                                    <option value="yes">是</option>
+                                    <option value="pending">待定</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>UWB 额度</label><input type="text" id="fCompletedUwbLimit" placeholder="例如：10亿元"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>汇报领导文字表述 (可编辑)</label>
+                        <textarea id="fSummaryText" rows="4" placeholder="自动生成后您可手动修改"></textarea>
+                        <button type="button" class="btn btn-sm btn-outline mt-8" onclick="generateSummary()">🔄 根据当前信息生成表述</button>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('projectModal')">取消</button>
+                    <button type="submit" class="btn btn-primary">保存项目</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <script>
-        // ================================================================
-        // 配置 Supabase（请替换为您的实际值）
-        // ================================================================
-        const SUPABASE_URL = 'https://dagdwpbevseqkozodfjl.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_X3Wk_FGWedEA-8GFvvE97Q_Dr6JmkZF';
-        // 请务必在 Supabase 控制台重置 anon key 后再使用！！！
+    <!-- ===== 子模态框 ===== -->
+    <!-- 投资意向 -->
+    <div class="modal-overlay" id="intentModal">
+        <div class="modal" style="max-width:560px;">
+            <button class="modal-close" onclick="closeModal('intentModal')">×</button>
+            <h2>添加投资意向</h2>
+            <form id="intentForm" onsubmit="saveInvestmentIntent(event)">
+                <input type="hidden" id="intentEditIndex" value="-1">
+                <div class="form-group"><label>投资主体 <span class="required">*</span></label><input type="text" id="fIntentInvestor" placeholder="例如：中银香港" required></div>
+                <div class="form-group"><label>意向百分比 (%)</label><input type="number" id="fIntentPercent" min="0" max="100" step="0.1" placeholder="30"></div>
+                <div class="form-group"><label>预计发行规模下限</label><input type="text" id="fIntentIssueMin" placeholder="10亿元"></div>
+                <div class="form-group"><label>预计发行规模上限</label><input type="text" id="fIntentIssueMax" placeholder="20亿元"></div>
+                <div class="form-group"><label><input type="checkbox" id="fIntentCheckBOC"> 检查中银香港可用额度</label></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('intentModal')">取消</button>
+                    <button type="submit" class="btn btn-success">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        // ================================================================
-        // 创建 Supabase 客户端（放在全局，确保其他函数可访问）
-        // ================================================================
-        if (typeof window.supabase === 'undefined') {
-            alert('Supabase SDK 未加载，请检查网络连接。');
-            throw new Error('Supabase SDK not loaded');
+    <!-- 委任更新 (日期+季度) -->
+    <div class="modal-overlay" id="updateModal">
+        <div class="modal" style="max-width:500px;">
+            <button class="modal-close" onclick="closeModal('updateModal')">×</button>
+            <h2>添加预计发行时间更新</h2>
+            <form id="updateForm" onsubmit="saveMandateUpdate(event)">
+                <input type="hidden" id="updateEditIndex" value="-1">
+                <div class="form-group"><label>更新日期</label><input type="date" id="fUpdateDate" required></div>
+                <div class="form-group"><label>预计发行日期或季度</label>
+                    <div class="quarter-select">
+                        <input type="date" id="fExpectedDate" style="flex:1;">
+                        <span style="color:#718096;">或</span>
+                        <input type="number" id="fExpectedYear" placeholder="年份" style="width:80px;" min="2020" max="2030">
+                        <select id="fExpectedQuarter" style="width:80px;">
+                            <option value="">季度</option>
+                            <option value="Q1">Q1</option>
+                            <option value="Q2">Q2</option>
+                            <option value="Q3">Q3</option>
+                            <option value="Q4">Q4</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>更新原因</label><input type="text" id="fUpdateReason" placeholder="例如：市场窗口调整" required></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('updateModal')">取消</button>
+                    <button type="submit" class="btn btn-success">保存更新</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 债券 -->
+    <div class="modal-overlay" id="bondModal">
+        <div class="modal" style="max-width:500px;">
+            <button class="modal-close" onclick="closeModal('bondModal')">×</button>
+            <h2>添加债券</h2>
+            <form id="bondForm" onsubmit="saveBond(event)">
+                <input type="hidden" id="bondEditIndex" value="-1">
+                <div class="form-group"><label>规模 <span class="required">*</span></label><input type="text" id="fBondSize" placeholder="例如：20亿元" required></div>
+                <div class="form-group"><label>货币 <span class="required">*</span></label><input type="text" id="fBondCurrency" placeholder="CNY / USD" required></div>
+                <div class="form-group"><label>年期 <span class="required">*</span></label><input type="text" id="fBondTenor" placeholder="例如：3年" required></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('bondModal')">取消</button>
+                    <button type="submit" class="btn btn-success">保存债券</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 承销商 -->
+    <div class="modal-overlay" id="underwriterModal">
+        <div class="modal" style="max-width:500px;">
+            <button class="modal-close" onclick="closeModal('underwriterModal')">×</button>
+            <h2>添加承销商</h2>
+            <form id="underwriterForm" onsubmit="saveUnderwriter(event)">
+                <input type="hidden" id="underwriterEditIndex" value="-1">
+                <div class="form-group"><label>角色 <span class="required">*</span></label><select id="fUnderwriterRole" required><option value="JGC">JGC</option><option value="JBR">JBR</option><option value="Co Manager">Co Manager</option></select></div>
+                <div class="form-group"><label>名称 <span class="required">*</span></label><input type="text" id="fUnderwriterName" placeholder="承销商名称" required></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('underwriterModal')">取消</button>
+                    <button type="submit" class="btn btn-success">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 进度更新 -->
+    <div class="modal-overlay" id="progressModal">
+        <div class="modal" style="max-width:560px;">
+            <button class="modal-close" onclick="closeModal('progressModal')">×</button>
+            <h2>添加工作进度更新</h2>
+            <form id="progressForm" onsubmit="saveProgressUpdate(event)">
+                <input type="hidden" id="progressEditIndex" value="-1">
+                <div class="form-group"><label>更新日期 <span class="required">*</span></label><input type="date" id="fProgressDate" required></div>
+                <div class="form-group"><label>更新内容 <span class="required">*</span></label><textarea id="fProgressContent" rows="4" placeholder="描述进度详情..." required></textarea></div>
+                <div class="form-group"><label>附件 (仅记录文件名)</label><input type="file" id="fProgressFile" accept=".ppt,.pptx,.doc,.docx,.pdf,.txt"><span style="font-size:12px;color:#a0aec0;">可选择文件，仅保存文件名</span></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('progressModal')">取消</button>
+                    <button type="submit" class="btn btn-success">保存进度</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 宣传记录 -->
+    <div class="modal-overlay" id="promotionModal">
+        <div class="modal" style="max-width:560px;">
+            <button class="modal-close" onclick="closeModal('promotionModal')">×</button>
+            <h2>添加宣传记录</h2>
+            <form id="promotionForm" onsubmit="savePromotionRecord(event)">
+                <input type="hidden" id="promotionEditIndex" value="-1">
+                <div class="form-group"><label>渠道 <span class="required">*</span></label><select id="fPromotionChannel" required><option value="新闻">新闻</option><option value="公众号">公众号</option><option value="中苑">中苑</option><option value="总行职工报">总行职工报</option><option value="其他">其他</option></select></div>
+                <div class="form-group"><label>宣传文字 <span class="required">*</span></label><textarea id="fPromotionText" rows="4" placeholder="粘贴宣传内容..." required></textarea></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('promotionModal')">取消</button>
+                    <button type="submit" class="btn btn-success">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 中国银行投资主体 -->
+    <div class="modal-overlay" id="bocModal">
+        <div class="modal" style="max-width:560px;">
+            <button class="modal-close" onclick="closeModal('bocModal')">×</button>
+            <h2>添加投资主体</h2>
+            <form id="bocForm" onsubmit="saveBocInvestment(event)">
+                <input type="hidden" id="bocEditIndex" value="-1">
+                <div class="form-group"><label>投资主体 <span class="required">*</span></label><input type="text" id="fBocInvestor" placeholder="例如：中银香港" required></div>
+                <div class="form-group"><label>投资量</label><input type="text" id="fBocAmount" placeholder="例如：5亿元"></div>
+                <div class="form-group"><label>实际需求量</label><input type="text" id="fBocActual" placeholder="例如：3亿元"></div>
+                <div class="form-group"><label>可分配量</label><input type="text" id="fBocAlloc" placeholder="例如：2亿元"></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('bocModal')">取消</button>
+                    <button type="submit" class="btn btn-success">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 通用记录 -->
+    <div class="modal-overlay" id="recordModal">
+        <div class="modal" style="max-width:560px;">
+            <button class="modal-close" onclick="closeModal('recordModal')">×</button>
+            <h2 id="recordModalTitle">添加记录</h2>
+            <form id="recordForm" onsubmit="saveRecord(event)">
+                <input type="hidden" id="recordProjectId" value="">
+                <input type="hidden" id="recordType" value="">
+                <div class="form-group"><label>日期 <span class="required">*</span></label><input type="date" id="fRecordTime" required></div>
+                <div class="form-group" id="recordAttendeesGroup" style="display:none;"><label>参会人 <span class="required">*</span></label><input type="text" id="fRecordAttendees" placeholder="张三、李四、王五"></div>
+                <div class="form-group"><label>内容 <span class="required">*</span></label><textarea id="fRecordContent" rows="4" placeholder="记录详细内容..." required></textarea></div>
+                <div class="form-group" id="recordFileGroup" style="display:none;"><label>附件 (文件将存储为 base64，建议小文件)</label><input type="file" id="fRecordFile"></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('recordModal')">取消</button>
+                    <button type="submit" class="btn btn-success">添加记录</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ================================================================
+    // 配置 Supabase (请替换为您的真实密钥)
+    // ================================================================
+    const SUPABASE_URL = 'https://dagdwpbevseqkozodfjl.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_X3Wk_FGWedEA-8GFvvE97Q_Dr6JmkZF'; // 请使用您重置后的新密钥
+
+    // 初始化 Supabase 客户端（与测试成功的方式一致）
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ================================================================
+    // 全局状态
+    // ================================================================
+    let currentUser = null;
+    let projects = [];
+    let expandedId = null;
+
+    // 临时编辑数据
+    let tempUpdates = [], tempBonds = [], tempProgress = [], tempUnderwriters = [];
+    let tempPromotionRecords = [], tempBocInvestments = [];
+    let tempInvestmentIntents = [];
+    let editingProjectId = null;
+
+    // ================================================================
+    // 认证模块
+    // ================================================================
+    async function initAuth() {
+        console.log('🔧 初始化认证...');
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+            console.error('获取会话失败:', error);
+            showAuth();
+            return;
         }
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase 客户端已初始化:', supabase);
-
-        // ================================================================
-        // 全局状态
-        // ================================================================
-        let currentUser = null;
-        let projects = [];
-
-        // ================================================================
-        // DOM 元素缓存
-        // ================================================================
-        const authCard = document.getElementById('authCard');
-        const appMain = document.getElementById('appMain');
-        const userEmailDisplay = document.getElementById('userEmailDisplay');
-        const authError = document.getElementById('authError');
-        const authSuccess = document.getElementById('authSuccess');
-        const emailInput = document.getElementById('emailInput');
-        const passwordInput = document.getElementById('passwordInput');
-        const loginBtn = document.getElementById('loginBtn');
-        const registerBtn = document.getElementById('registerBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const projectsContainer = document.getElementById('projectsContainer');
-        const searchInput = document.getElementById('searchInput');
-
-        // ================================================================
-        // 辅助函数
-        // ================================================================
-        function escHtml(str) {
-            if (!str) return '';
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
+        if (data.session) {
+            currentUser = data.session.user;
+            console.log('✅ 已登录用户:', currentUser.email);
+            showApp();
+            await loadProjects();
+        } else {
+            console.log('未登录，显示认证界面');
+            showAuth();
         }
+    }
 
-        function statusMap(s) {
-            const map = { 'marketing': '营销中', 'mandated': '委任中', 'completed': '已完成' };
-            return map[s] || s;
+    function showAuth() {
+        document.getElementById('authCard').style.display = 'block';
+        document.getElementById('appMain').classList.add('hidden');
+    }
+
+    function showApp() {
+        document.getElementById('authCard').style.display = 'none';
+        document.getElementById('appMain').classList.remove('hidden');
+        document.getElementById('userDisplay').textContent = '👤 ' + currentUser.email;
+        document.getElementById('logoutBtn').style.display = 'inline-block';
+    }
+
+    // ---------- 登录 ----------
+    document.getElementById('loginBtn').addEventListener('click', async function() {
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+        const errEl = document.getElementById('authError');
+        errEl.textContent = '';
+        if (!email || !password) {
+            errEl.textContent = '请输入邮箱和密码';
+            return;
         }
-
-        function showAuth() {
-            authCard.classList.remove('hidden');
-            appMain.classList.add('hidden');
-        }
-
-        function showApp() {
-            authCard.classList.add('hidden');
-            appMain.classList.remove('hidden');
-            userEmailDisplay.textContent = '👤 ' + currentUser.email;
-        }
-
-        function updateStats() {
-            document.getElementById('totalCount').textContent = projects.length;
-            document.getElementById('marketingCount').textContent = projects.filter(p => p.status === 'marketing').length;
-            document.getElementById('mandatedCount').textContent = projects.filter(p => p.status === 'mandated').length;
-            document.getElementById('completedCount').textContent = projects.filter(p => p.status === 'completed').length;
-        }
-
-        // ================================================================
-        // 认证函数
-        // ================================================================
-        async function initAuth() {
-            console.log('🔐 初始化认证...');
-            try {
-                const { data, error } = await supabase.auth.getSession();
-                if (error) {
-                    console.error('获取会话失败:', error);
-                    showAuth();
-                    return;
-                }
-                if (data.session) {
-                    currentUser = data.session.user;
-                    console.log('✅ 已登录用户:', currentUser.email);
-                    showApp();
-                    await loadProjects();
-                } else {
-                    console.log('🚫 未登录');
-                    showAuth();
-                }
-            } catch (e) {
-                console.error('初始化认证异常:', e);
-                showAuth();
-            }
-        }
-
-        // ---------- 登录 ----------
-        loginBtn.addEventListener('click', async function() {
-            console.log('🔑 点击登录');
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-            authError.textContent = '';
-            authSuccess.textContent = '';
-            if (!email || !password) {
-                authError.textContent = '请输入邮箱和密码';
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                errEl.textContent = '登录失败: ' + error.message;
                 return;
             }
-            try {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) {
-                    authError.textContent = '登录失败: ' + error.message;
-                    console.error('登录失败:', error);
-                    return;
-                }
+            currentUser = data.user;
+            showApp();
+            await loadProjects();
+        } catch (e) {
+            errEl.textContent = '登录异常: ' + e.message;
+        }
+    });
+
+    // ---------- 注册 ----------
+    document.getElementById('registerBtn').addEventListener('click', async function() {
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+        const errEl = document.getElementById('authError');
+        const sucEl = document.getElementById('authSuccess');
+        errEl.textContent = '';
+        sucEl.textContent = '';
+        if (!email || !password) {
+            errEl.textContent = '请输入邮箱和密码';
+            return;
+        }
+        if (password.length < 6) {
+            errEl.textContent = '密码至少6位';
+            return;
+        }
+        try {
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            if (error) {
+                errEl.textContent = '注册失败: ' + error.message;
+                return;
+            }
+            if (data.user) {
                 currentUser = data.user;
-                console.log('✅ 登录成功:', currentUser.email);
+                sucEl.textContent = '注册成功！已自动登录。';
                 showApp();
                 await loadProjects();
-            } catch (e) {
-                authError.textContent = '登录异常: ' + e.message;
-                console.error('登录异常:', e);
-            }
-        });
-
-        // ---------- 注册 ----------
-        registerBtn.addEventListener('click', async function() {
-            console.log('📝 点击注册');
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-            authError.textContent = '';
-            authSuccess.textContent = '';
-            if (!email || !password) {
-                authError.textContent = '请输入邮箱和密码';
-                return;
-            }
-            if (password.length < 6) {
-                authError.textContent = '密码至少6位';
-                return;
-            }
-            try {
-                const { data, error } = await supabase.auth.signUp({ email, password });
-                if (error) {
-                    authError.textContent = '注册失败: ' + error.message;
-                    console.error('注册失败:', error);
-                    return;
-                }
-                if (data.user) {
-                    currentUser = data.user;
-                    authSuccess.textContent = '注册成功！已自动登录。';
-                    console.log('✅ 注册成功并登录:', currentUser.email);
-                    showApp();
-                    await loadProjects();
-                } else {
-                    authSuccess.textContent = '注册成功，但请检查邮箱确认（如果开启了邮箱验证）。';
-                    console.log('注册成功但需要邮箱确认');
-                }
-            } catch (e) {
-                authError.textContent = '注册异常: ' + e.message;
-                console.error('注册异常:', e);
-            }
-        });
-
-        // ---------- 登出 ----------
-        logoutBtn.addEventListener('click', async function() {
-            console.log('🚪 登出');
-            await supabase.auth.signOut();
-            currentUser = null;
-            projects = [];
-            renderProjects();
-            showAuth();
-        });
-
-        // ================================================================
-        // 数据操作
-        // ================================================================
-        async function loadProjects() {
-            if (!currentUser) {
-                console.warn('未登录，无法加载项目');
-                return;
-            }
-            console.log('📂 加载项目数据...');
-            try {
-                const { data, error } = await supabase
-                    .from('projects')
-                    .select('*')
-                    .eq('user_id', currentUser.id);
-                if (error) {
-                    console.error('加载项目失败:', error);
-                    return;
-                }
-                projects = data.map(row => ({ id: row.id, ...row.data }));
-                console.log('✅ 加载了', projects.length, '个项目');
-                renderProjects();
-            } catch (e) {
-                console.error('加载项目异常:', e);
-            }
-        }
-
-        async function saveProjectToDB(projectData, id) {
-            if (!currentUser) throw new Error('未登录');
-            console.log('💾 保存项目:', projectData.issuerName);
-            if (id) {
-                const { error } = await supabase
-                    .from('projects')
-                    .update({ data: projectData })
-                    .eq('id', id)
-                    .eq('user_id', currentUser.id);
-                if (error) throw error;
             } else {
-                const { error } = await supabase
-                    .from('projects')
-                    .insert([{ user_id: currentUser.id, data: projectData }]);
-                if (error) throw error;
+                sucEl.textContent = '注册成功，但请检查邮箱确认（如果开启了邮箱验证）。';
             }
-            console.log('✅ 保存成功');
+        } catch (e) {
+            errEl.textContent = '注册异常: ' + e.message;
         }
+    });
 
-        async function deleteProjectFromDB(id) {
-            if (!currentUser) throw new Error('未登录');
-            console.log('🗑️ 删除项目:', id);
+    // ---------- 登出 ----------
+    window.logout = async function() {
+        await supabase.auth.signOut();
+        currentUser = null;
+        projects = [];
+        renderProjects();
+        document.getElementById('appMain').classList.add('hidden');
+        document.getElementById('authCard').style.display = 'block';
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('userDisplay').textContent = '';
+    };
+
+    // ================================================================
+    // 数据操作
+    // ================================================================
+    async function loadProjects() {
+        if (!currentUser) return;
+        console.log('加载项目数据...');
+        try {
+            const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .eq('user_id', currentUser.id);
+            if (error) {
+                alert('加载项目失败: ' + error.message);
+                return;
+            }
+            projects = data.map(row => ({ id: row.id, ...row.data }));
+            renderProjects();
+        } catch (e) {
+            alert('加载项目异常: ' + e.message);
+        }
+    }
+
+    async function saveProjectToDB(projectData, id) {
+        if (!currentUser) throw new Error('未登录');
+        console.log('保存项目:', projectData.issuerName);
+        if (id) {
             const { error } = await supabase
                 .from('projects')
-                .delete()
+                .update({ data: projectData })
                 .eq('id', id)
                 .eq('user_id', currentUser.id);
             if (error) throw error;
-            console.log('✅ 删除成功');
+        } else {
+            const { error } = await supabase
+                .from('projects')
+                .insert([{ user_id: currentUser.id, data: projectData }]);
+            if (error) throw error;
+        }
+        console.log('✅ 保存成功');
+    }
+
+    async function deleteProjectFromDB(id) {
+        if (!currentUser) throw new Error('未登录');
+        console.log('删除项目:', id);
+        const { error } = await supabase
+            .from('projects')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', currentUser.id);
+        if (error) throw error;
+        console.log('✅ 删除成功');
+    }
+
+    // ================================================================
+    // 排序与筛选
+    // ================================================================
+    function getStatusOrder(status) {
+        const map = { 'marketing': 0, 'mandated': 1, 'completed': 2 };
+        return map[status] !== undefined ? map[status] : 3;
+    }
+
+    function getExpectedDateObj(project) {
+        if (project.status === 'completed' && project.completionDetails && project.completionDetails.pricingDate) {
+            return new Date(project.completionDetails.pricingDate + 'T00:00:00');
+        }
+        if (project.mandateDetails && project.mandateDetails.updates && project.mandateDetails.updates.length > 0) {
+            const sorted = [...project.mandateDetails.updates].sort((a, b) => (a.date > b.date ? 1 : -1));
+            const latest = sorted[sorted.length - 1];
+            if (latest.expectedDate) {
+                return new Date(latest.expectedDate + 'T00:00:00');
+            } else if (latest.expectedYear && latest.expectedQuarter) {
+                const month = { 'Q1': 3, 'Q2': 6, 'Q3': 9, 'Q4': 12 } [latest.expectedQuarter] || 12;
+                return new Date(parseInt(latest.expectedYear), month - 1, 28);
+            }
+        }
+        return null;
+    }
+
+    function getNote(project) {
+        if (project.status === 'completed') {
+            return project.completionDetails ? project.completionDetails.summaryText : '';
+        } else {
+            let currency = '', scale = '', time = '';
+            if (project.mandateDetails && project.mandateDetails.bonds && project.mandateDetails.bonds.length > 0) {
+                const bond = project.mandateDetails.bonds[0];
+                currency = bond.currency || '';
+                scale = bond.size || '';
+            }
+            if (!scale && project.investmentIntents && project.investmentIntents.length > 0) {
+                const intent = project.investmentIntents[0];
+                if (intent.issueMin && intent.issueMax) scale = `${intent.issueMin} ~ ${intent.issueMax}`;
+                else if (intent.issueMin) scale = intent.issueMin;
+            }
+            if (project.mandateDetails && project.mandateDetails.updates && project.mandateDetails.updates.length > 0) {
+                const sorted = [...project.mandateDetails.updates].sort((a, b) => (a.date > b.date ? 1 : -1));
+                const latest = sorted[sorted.length - 1];
+                if (latest.expectedDate) {
+                    time = formatDate(latest.expectedDate);
+                } else if (latest.expectedYear && latest.expectedQuarter) {
+                    time = latest.expectedYear + ' ' + latest.expectedQuarter;
+                }
+            }
+            let parts = [];
+            if (currency) parts.push(`货币:${currency}`);
+            if (scale) parts.push(`规模:${scale}`);
+            if (time) parts.push(`时间:${time}`);
+            return parts.join(' | ') || '暂无摘要';
+        }
+    }
+
+    function formatDate(dt) {
+        if (!dt) return '-';
+        try {
+            const d = new Date(dt + 'T00:00:00');
+            return d.toLocaleDateString('zh-CN');
+        } catch (_) { return dt; }
+    }
+
+    function escHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ================================================================
+    // 渲染项目列表
+    // ================================================================
+    function renderProjects() {
+        const search = document.getElementById('searchInput').value.trim().toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const sortOrder = document.getElementById('sortOrder').value;
+
+        let filtered = projects.filter(p => {
+            if (search && !p.issuerName.toLowerCase().includes(search)) return false;
+            if (statusFilter !== 'all' && p.status !== statusFilter) return false;
+            return true;
+        });
+
+        filtered.sort((a, b) => {
+            const orderA = getStatusOrder(a.status);
+            const orderB = getStatusOrder(b.status);
+            if (orderA !== orderB) return orderA - orderB;
+            const dateA = getExpectedDateObj(a);
+            const dateB = getExpectedDateObj(b);
+            if (dateA && dateB) {
+                return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+            }
+            if (dateA) return sortOrder === 'asc' ? -1 : 1;
+            if (dateB) return sortOrder === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        const tbody = document.getElementById('projectBody');
+        const empty = document.getElementById('emptyState');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '';
+            empty.style.display = 'block';
+            updateStats(projects);
+            return;
+        }
+        empty.style.display = 'none';
+
+        let html = '';
+        filtered.forEach((p) => {
+            const isExpanded = (expandedId === p.id);
+            const ratingClass = getRatingClass(p.externalRating);
+            const statusMap = { 'marketing': '营销中', 'mandated': '委任中', 'completed': '已完成' };
+            const statusText = statusMap[p.status] || '营销中';
+            const statusClass = 'badge-status ' + (p.status || 'marketing');
+            const note = getNote(p);
+
+            html += `
+                <tr class="project-row ${isExpanded ? 'expanded' : ''}" onclick="toggleExpand('${p.id}')">
+                    <td><span class="issuer-name">${escHtml(p.issuerName)}</span></td>
+                    <td>${escHtml(p.industry)||'-'}</td>
+                    <td><span class="badge ${ratingClass}">${escHtml(p.externalRating) || '-'}</span></td>
+                    <td>${escHtml(p.bankInternalRating) || '-'}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td class="note-column"><div class="note-content" title="${escHtml(note)}">${escHtml(note)}</div></td>
+                    <td>
+                        <div class="row-actions" onclick="event.stopPropagation();">
+                            <button class="btn btn-primary btn-xs" onclick="editProject('${p.id}')">编辑</button>
+                            <button class="btn btn-danger btn-xs" onclick="deleteProject('${p.id}')">删除</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="detail-row ${isExpanded ? 'open' : ''}">
+                    <td colspan="7" class="detail-cell">
+                        ${renderDetail(p)}
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+        updateStats(projects);
+        updateReminders();
+        updateBloombergReminder();
+    }
+
+    function getRatingClass(rating) {
+        if (!rating) return '';
+        const r = rating.toUpperCase();
+        if (r.includes('AAA')) return 'badge-aaa';
+        if (r.includes('AA')) return 'badge-aa';
+        if (r.includes('A')) return 'badge-a';
+        if (r.includes('BBB')) return 'badge-bbb';
+        return '';
+    }
+
+    function updateStats(data) {
+        document.getElementById('totalCount').textContent = data.length;
+        const marketing = data.filter(p => p.status === 'marketing').length;
+        const mandated = data.filter(p => p.status === 'mandated').length;
+        const completed = data.filter(p => p.status === 'completed').length;
+        document.getElementById('marketingCount').textContent = marketing;
+        document.getElementById('mandatedCount').textContent = mandated;
+        document.getElementById('completedCount').textContent = completed;
+
+        // 地区统计（简化）
+        const regionMap = {};
+        data.forEach(p => {
+            const r = p.region || '其他';
+            regionMap[r] = (regionMap[r] || 0) + 1;
+        });
+        let regionHtml = '';
+        for (const [region, count] of Object.entries(regionMap)) {
+            regionHtml += `<div class="stat-item" style="flex:0 0 auto; padding:8px 16px;"><span class="label">${region}</span><span class="value" style="font-size:18px;">${count}</span></div>`;
+        }
+        document.getElementById('regionStats').innerHTML = regionHtml;
+    }
+
+    // ================================================================
+    // 详情渲染 (完整)
+    // ================================================================
+    function renderDetail(p) {
+        const marketing = p.marketingRecords || [];
+        const work = p.workRecords || [];
+        const meeting = p.meetingMinutes || [];
+        const g = p.guaranteeDetails || {};
+        const hasGuarantee = g.hasGuarantee || false;
+        const intents = p.investmentIntents || [];
+
+        let statusDetailHtml = '';
+        const status = p.status || 'marketing';
+
+        // 投资意向显示
+        let intentHtml = '';
+        if (status === 'marketing' || status === 'mandated') {
+            if (intents.length === 0) {
+                intentHtml = '<div style="color:#a0aec0;font-size:13px;">暂无投资意向</div>';
+            } else {
+                intentHtml = intents.map(item => `
+                    <div class="record-item" style="border-left-color:#f6ad55;">
+                        <div>投资主体: ${escHtml(item.investor)}</div>
+                        <div>意向比例: ${item.percent || 0}%</div>
+                        <div>预计发行规模: ${escHtml(item.issueMin||'')} ~ ${escHtml(item.issueMax||'')}</div>
+                        ${item.checkBoc ? `<div>✅ 已勾选检查中银香港额度</div>` : ''}
+                    </div>
+                `).join('');
+            }
+            intentHtml = `
+                <div class="detail-section full-width">
+                    <h4>📊 投资意向</h4>
+                    ${intentHtml}
+                </div>
+            `;
         }
 
-        // ================================================================
-        // 渲染
-        // ================================================================
-        function renderProjects() {
-            const search = searchInput.value.trim().toLowerCase();
-            let filtered = projects.filter(p => p.issuerName && p.issuerName.toLowerCase().includes(search));
-            const statusOrder = { 'marketing': 0, 'mandated': 1, 'completed': 2 };
-            filtered.sort((a, b) => (statusOrder[a.status] || 0) - (statusOrder[b.status] || 0));
+        if (status === 'mandated' && p.mandateDetails) {
+            const updates = p.mandateDetails.updates || [];
+            const bonds = p.mandateDetails.bonds || [];
+            const progress = p.mandateDetails.progressUpdates || [];
+            const underwriters = p.mandateDetails.underwriters || [];
+            const bndMap = { 'yes': '是', 'no': '否', 'pending': '待定' };
+            statusDetailHtml = `
+                <div class="detail-section full-width">
+                    <h4>📌 委任详情</h4>
+                    <div class="field-row"><span class="label">BnD银行</span><span class="value">${bndMap[p.bndStatus]||'否'}</span></div>
+                    ${p.bndStatus === 'yes' ? `<div class="field-row"><span class="label">UWB额度</span><span class="value">${escHtml(p.uwbLimit)||'-'}</span></div>` : ''}
+                    <div style="margin:8px 0 4px;"><strong>承销商：</strong></div>
+                    ${underwriters.length===0?'<div style="color:#a0aec0;font-size:13px;">暂无承销商</div>':
+                        underwriters.map(u => `<div class="record-item" style="border-left-color:#9f7aea;">${escHtml(u.role)}: ${escHtml(u.name)}</div>`).join('')
+                    }
+                    <div style="margin:12px 0 8px;"><strong>预计发行时间更新：</strong></div>
+                    ${updates.length===0?'<div style="color:#a0aec0;font-size:13px;">暂无更新</div>':
+                        updates.map(u => `
+                            <div class="record-item" style="border-left-color:#f6ad55;">
+                                <div class="record-meta">
+                                    <span class="record-time">${formatDate(u.date)}</span>
+                                    <span>预计: ${u.expectedDate ? formatDate(u.expectedDate) : (u.expectedYear && u.expectedQuarter ? u.expectedYear + ' ' + u.expectedQuarter : '-')}</span>
+                                </div>
+                                <div class="record-content">原因: ${escHtml(u.reason)}</div>
+                            </div>
+                        `).join('')
+                    }
+                    <div style="margin:12px 0 8px;"><strong>债券列表：</strong></div>
+                    ${bonds.length===0?'<div style="color:#a0aec0;font-size:13px;">暂无债券</div>':
+                        bonds.map(b => `
+                            <div class="record-item" style="border-left-color:#48bb78;">
+                                <div>规模: ${escHtml(b.size)}  |  货币: ${escHtml(b.currency)}  |  年期: ${escHtml(b.tenor)}</div>
+                            </div>
+                        `).join('')
+                    }
+                    <div style="margin:12px 0 8px;"><strong>工作进度更新：</strong></div>
+                    ${progress.length===0?'<div style="color:#a0aec0;font-size:13px;">暂无进度</div>':
+                        progress.map(pr => `
+                            <div class="record-item" style="border-left-color:#9f7aea;">
+                                <div class="record-meta">
+                                    <span class="record-time">${formatDate(pr.date)}</span>
+                                    ${pr.attachment ? `<span>📎 ${escHtml(pr.attachment)}</span>` : ''}
+                                </div>
+                                <div class="record-content">${escHtml(pr.content)}</div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            `;
+        } else if (status === 'marketing') {
+            // 营销中没有额外委任信息
+            statusDetailHtml = '';
+        } else if (status === 'completed' && p.completionDetails) {
+            const c = p.completionDetails;
+            const promoRecords = c.promotionRecords || [];
+            const bocInv = (c.bocInvestments || []).map(b => 
+                `${escHtml(b.investor)} 投资${escHtml(b.amount)}，实际需求${escHtml(b.actual)}，可分配${escHtml(b.alloc)}`
+            ).join('；') || '无';
+            const bndMap = { 'yes': '是', 'no': '否', 'pending': '待定' };
+            statusDetailHtml = `
+                <div class="detail-section full-width">
+                    <h4>✅ 完成定价信息</h4>
+                    <div class="field-row"><span class="label">定价日期</span><span class="value">${formatDate(c.pricingDate)}</span></div>
+                    <div class="field-row"><span class="label">定价信息</span><span class="value">${escHtml(c.pricingInfo)||'-'}</span></div>
+                    <div class="field-row"><span class="label">是否宣传</span><span class="value">${c.isPromoted ? '是' : '否'}</span></div>
+                    ${c.isPromoted ? `
+                        <div style="margin:8px 0 4px;"><strong>宣传记录：</strong></div>
+                        ${promoRecords.length===0?'<div style="color:#a0aec0;font-size:13px;">无宣传记录</div>':
+                            promoRecords.map(pr => `
+                                <div class="record-item" style="border-left-color:#48bb78;">
+                                    <div><strong>${escHtml(pr.channel)}</strong></div>
+                                    <div class="record-content">${escHtml(pr.text)}</div>
+                                </div>
+                            `).join('')
+                        }
+                    ` : ''}
+                    <div class="field-row"><span class="label">收款行情况</span><span class="value">${escHtml(c.receivingBank)||'-'}</span></div>
+                    <div class="field-row"><span class="label">中国银行投资</span><span class="value">${bocInv}</span></div>
+                    <div class="field-row"><span class="label">BnD状态</span><span class="value">${bndMap[c.bndStatus]||'否'}</span></div>
+                    ${c.uwbLimit ? `<div class="field-row"><span class="label">UWB额度</span><span class="value">${escHtml(c.uwbLimit)}</span></div>` : ''}
+                    <div class="field-row"><span class="label">汇报表述</span><span class="value" style="white-space:pre-wrap;">${escHtml(c.summaryText)||'-'}</span></div>
+                </div>
+            `;
+        }
 
-            if (filtered.length === 0) {
-                projectsContainer.innerHTML = '<p style="text-align:center; color:#a0aec0; padding:30px;">暂无项目</p>';
+        let guaranteeHtml = '';
+        if (hasGuarantee) {
+            guaranteeHtml = `
+                <div class="detail-section full-width">
+                    <h4>🔒 担保详情</h4>
+                    <div class="field-row"><span class="label">担保人名称</span><span class="value">${escHtml(g.guarantorName)||'-'}</span></div>
+                    <div class="field-row"><span class="label">与发行机构关系</span><span class="value">${escHtml(g.relationship)||'-'}</span></div>
+                    <div class="field-row"><span class="label">担保人外部评级</span><span class="value">${escHtml(g.externalRating)||'-'}</span></div>
+                    <div class="field-row"><span class="label">担保人内部评级</span><span class="value">${escHtml(g.internalRating)||'-'}</span></div>
+                </div>
+            `;
+        }
+
+        // 会议记录（含附件）
+        const meetingHtml = meeting.map(r => `
+            <div class="record-item">
+                <div class="record-meta">
+                    <span class="record-time">${formatDate(r.date)}</span>
+                    <span class="record-attendees">👥 ${escHtml(r.attendees)||'-'}</span>
+                    <button class="record-delete" onclick="deleteRecord('${p.id}','meetingMinutes','${r.date}')">删除</button>
+                </div>
+                <div class="record-content">${escHtml(r.content)}</div>
+                ${r.attachment ? `<div style="margin-top:4px; font-size:12px;">📎 <a href="#" onclick="downloadAttachment('${p.id}','meetingMinutes','${r.date}')">${escHtml(r.attachment.split('|')[0])}</a></div>` : ''}
+            </div>
+        `).join('');
+
+        return `
+            <div class="detail-content">
+                <div class="detail-section full-width">
+                    <h4>📋 项目基本信息</h4>
+                    <div class="field-row"><span class="label">发行人</span><span class="value">${escHtml(p.issuerName)}</span></div>
+                    <div class="field-row"><span class="label">行业</span><span class="value">${escHtml(p.industry)||'-'}</span></div>
+                    <div class="field-row"><span class="label">地区</span><span class="value">${escHtml(p.region)||'-'}</span></div>
+                    <div class="field-row"><span class="label">担保</span><span class="value">${hasGuarantee ? '有' : '无'}</span></div>
+                    <div class="field-row"><span class="label">所属处室</span><span class="value">${escHtml(p.department)||'-'}</span></div>
+                    <div class="field-row"><span class="label">主要前线</span><span class="value">${escHtml(p.frontLine)||'-'}</span></div>
+                    <div class="field-row"><span class="label">主管</span><span class="value">${escHtml(p.supervisorName)||'-'} ${escHtml(p.supervisorPhone)||''}</span></div>
+                    <div class="field-row"><span class="label">亮点</span><span class="value">${escHtml(p.highlights)||'-'}</span></div>
+                    <div class="field-row"><span class="label">预计发行规模</span><span class="value">${escHtml(p.expectedScale)||'-'}</span></div>
+                    <div class="field-row"><span class="label">外部评级</span><span class="value">${escHtml(p.externalRating) || '-'}</span></div>
+                    <div class="field-row"><span class="label">内部评级</span><span class="value">${escHtml(p.bankInternalRating) || '-'}</span></div>
+                    <div class="field-row"><span class="label">近期债券发行</span><span class="value">${escHtml(p.recentBondIssuance) || '-'}</span></div>
+                    <div class="field-row"><span class="label">最近到期项目</span><span class="value">${escHtml(p.recentMaturityProject) || '-'}</span></div>
+                    <div class="field-row"><span class="label">额度情况</span><span class="value">${escHtml(p.creditLimit) || '-'}</span></div>
+                    <div class="field-row"><span class="label">项目状态</span><span class="value">${
+                        {marketing:'营销中',mandated:'委任中',completed:'已完成'}[p.status]||'营销中'
+                    }</span></div>
+                </div>
+
+                ${guaranteeHtml}
+                ${intentHtml}
+                ${statusDetailHtml}
+
+                <div class="detail-section">
+                    <h4>📢 营销记录 <span class="badge-count">${marketing.length}</span></h4>
+                    <div class="record-list">
+                        ${marketing.length===0?'<div style="color:#a0aec0;font-size:13px;padding:8px 0;">暂无记录</div>':
+                            marketing.map(r => `
+                                <div class="record-item">
+                                    <div class="record-meta">
+                                        <span class="record-time">${formatDate(r.date)}</span>
+                                        <button class="record-delete" onclick="deleteRecord('${p.id}','marketingRecords','${r.date}')">删除</button>
+                                    </div>
+                                    <div class="record-content">${escHtml(r.content)}</div>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                    <button class="add-record-btn" onclick="openRecordModal('${p.id}','marketingRecords')">＋ 添加营销记录</button>
+                </div>
+
+                <div class="detail-section">
+                    <h4>💼 工作记录 <span class="badge-count">${work.length}</span></h4>
+                    <div class="record-list">
+                        ${work.length===0?'<div style="color:#a0aec0;font-size:13px;padding:8px 0;">暂无记录</div>':
+                            work.map(r => `
+                                <div class="record-item">
+                                    <div class="record-meta">
+                                        <span class="record-time">${formatDate(r.date)}</span>
+                                        <button class="record-delete" onclick="deleteRecord('${p.id}','workRecords','${r.date}')">删除</button>
+                                    </div>
+                                    <div class="record-content">${escHtml(r.content)}</div>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                    <button class="add-record-btn" onclick="openRecordModal('${p.id}','workRecords')">＋ 添加工作记录</button>
+                </div>
+
+                <div class="detail-section full-width">
+                    <h4>📝 开会纪要 <span class="badge-count">${meeting.length}</span></h4>
+                    <div class="record-list">
+                        ${meeting.length===0?'<div style="color:#a0aec0;font-size:13px;padding:8px 0;">暂无记录</div>':
+                            meetingHtml
+                        }
+                    </div>
+                    <button class="add-record-btn" onclick="openRecordModal('${p.id}','meetingMinutes')">＋ 添加开会纪要</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // ================================================================
+    // 展开/折叠
+    // ================================================================
+    function toggleExpand(id) {
+        if (expandedId === id) {
+            expandedId = null;
+        } else {
+            expandedId = id;
+        }
+        renderProjects();
+        if (expandedId) {
+            setTimeout(() => {
+                const row = document.querySelector(`tr.project-row.expanded`);
+                if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
+        }
+    }
+
+    // ================================================================
+    // 项目 CRUD
+    // ================================================================
+    function openAddModal() {
+        openModal('projectModal');
+        document.getElementById('projectModalTitle').textContent = '新增项目';
+        document.getElementById('editId').value = '';
+        document.getElementById('projectForm').reset();
+        tempUpdates = []; tempBonds = []; tempProgress = []; tempUnderwriters = [];
+        tempPromotionRecords = []; tempBocInvestments = []; tempInvestmentIntents = [];
+        editingProjectId = null;
+        document.getElementById('fStatus').value = 'marketing';
+        document.getElementById('fHasGuarantee').value = '0';
+        document.getElementById('fIsPromoted').value = '0';
+        document.getElementById('fBnDStatus').value = 'no';
+        toggleGuaranteeDetails();
+        togglePromotionSection();
+        toggleUwbSection();
+        onStatusChange();
+        renderSubLists();
+        renderInvestmentIntents();
+        document.getElementById('fCompletedBndStatus').value = 'no';
+        document.getElementById('fCompletedUwbLimit').value = '';
+    }
+
+    function editProject(id) {
+        const p = projects.find(x => x.id === id);
+        if (!p) return;
+        openModal('projectModal');
+        document.getElementById('projectModalTitle').textContent = '编辑项目';
+        document.getElementById('editId').value = id;
+        document.getElementById('fStatus').value = p.status || 'marketing';
+        document.getElementById('fIssuerName').value = p.issuerName || '';
+        document.getElementById('fIndustry').value = p.industry || '其他';
+        document.getElementById('fRegion').value = p.region || '中国内地';
+        document.getElementById('fDepartment').value = p.department || '';
+        document.getElementById('fFrontLine').value = p.frontLine || '';
+        document.getElementById('fSupervisorName').value = p.supervisorName || '';
+        document.getElementById('fSupervisorPhone').value = p.supervisorPhone || '';
+        document.getElementById('fHighlights').value = p.highlights || '';
+        document.getElementById('fExpectedScale').value = p.expectedScale || '';
+        document.getElementById('fExternalRating').value = p.externalRating || '';
+        document.getElementById('fBankRating').value = p.bankInternalRating || '';
+        document.getElementById('fRecentBond').value = p.recentBondIssuance || '';
+        document.getElementById('fRecentMaturity').value = p.recentMaturityProject || '';
+        document.getElementById('fCreditLimit').value = p.creditLimit || '';
+        const g = p.guaranteeDetails || {};
+        document.getElementById('fHasGuarantee').value = g.hasGuarantee ? '1' : '0';
+        document.getElementById('fGuarantorName').value = g.guarantorName || '';
+        document.getElementById('fGuarantorRelation').value = g.relationship || '';
+        document.getElementById('fGuarantorExternal').value = g.externalRating || '';
+        document.getElementById('fGuarantorInternal').value = g.internalRating || '';
+        toggleGuaranteeDetails();
+        editingProjectId = id;
+        document.getElementById('fBnDStatus').value = p.bndStatus || 'no';
+        document.getElementById('fUwbLimit').value = p.uwbLimit || '';
+        toggleUwbSection();
+
+        tempInvestmentIntents = p.investmentIntents ? p.investmentIntents.slice() : [];
+        if (p.mandateDetails) {
+            tempUpdates = p.mandateDetails.updates || [];
+            tempBonds = p.mandateDetails.bonds || [];
+            tempProgress = p.mandateDetails.progressUpdates || [];
+            tempUnderwriters = p.mandateDetails.underwriters || [];
+        } else {
+            tempUpdates = []; tempBonds = []; tempProgress = []; tempUnderwriters = [];
+        }
+        if (p.completionDetails) {
+            const c = p.completionDetails;
+            document.getElementById('fPricingDate').value = c.pricingDate || '';
+            document.getElementById('fPricingInfo').value = c.pricingInfo || '';
+            document.getElementById('fIsPromoted').value = c.isPromoted ? '1' : '0';
+            tempPromotionRecords = c.promotionRecords || [];
+            tempBocInvestments = c.bocInvestments || [];
+            document.getElementById('fReceivingBank').value = c.receivingBank || '';
+            document.getElementById('fCompletedBndStatus').value = c.bndStatus || p.bndStatus || 'no';
+            document.getElementById('fCompletedUwbLimit').value = c.uwbLimit || p.uwbLimit || '';
+            document.getElementById('fSummaryText').value = c.summaryText || '';
+        } else {
+            document.getElementById('fPricingDate').value = '';
+            document.getElementById('fPricingInfo').value = '';
+            document.getElementById('fIsPromoted').value = '0';
+            tempPromotionRecords = [];
+            tempBocInvestments = [];
+            document.getElementById('fReceivingBank').value = '';
+            document.getElementById('fCompletedBndStatus').value = p.bndStatus || 'no';
+            document.getElementById('fCompletedUwbLimit').value = p.uwbLimit || '';
+            document.getElementById('fSummaryText').value = '';
+        }
+        togglePromotionSection();
+        onStatusChange();
+        renderSubLists();
+        renderInvestmentIntents();
+    }
+
+    function saveProject(e) {
+        e.preventDefault();
+        try {
+            const id = document.getElementById('editId').value;
+            const status = document.getElementById('fStatus').value;
+            const baseData = {
+                issuerName: document.getElementById('fIssuerName').value.trim(),
+                industry: document.getElementById('fIndustry').value,
+                region: document.getElementById('fRegion').value,
+                department: document.getElementById('fDepartment').value.trim(),
+                frontLine: document.getElementById('fFrontLine').value.trim(),
+                supervisorName: document.getElementById('fSupervisorName').value.trim(),
+                supervisorPhone: document.getElementById('fSupervisorPhone').value.trim(),
+                highlights: document.getElementById('fHighlights').value.trim(),
+                expectedScale: document.getElementById('fExpectedScale').value.trim(),
+                externalRating: document.getElementById('fExternalRating').value.trim(),
+                bankInternalRating: document.getElementById('fBankRating').value.trim(),
+                recentBondIssuance: document.getElementById('fRecentBond').value.trim(),
+                recentMaturityProject: document.getElementById('fRecentMaturity').value.trim(),
+                creditLimit: document.getElementById('fCreditLimit').value.trim(),
+                status: status,
+                bndStatus: document.getElementById('fBnDStatus').value,
+                uwbLimit: document.getElementById('fUwbLimit').value.trim(),
+                investmentIntents: tempInvestmentIntents.slice(),
+            };
+            if (!baseData.issuerName) { alert('请输入发行人姓名'); return; }
+            const hasGuarantee = document.getElementById('fHasGuarantee').value === '1';
+            const guaranteeDetails = {
+                hasGuarantee: hasGuarantee,
+                guarantorName: document.getElementById('fGuarantorName').value.trim(),
+                relationship: document.getElementById('fGuarantorRelation').value.trim(),
+                externalRating: document.getElementById('fGuarantorExternal').value.trim(),
+                internalRating: document.getElementById('fGuarantorInternal').value.trim(),
+            };
+
+            let mandateDetails = null;
+            if (status === 'mandated') {
+                mandateDetails = {
+                    updates: tempUpdates.slice(),
+                    bonds: tempBonds.slice(),
+                    progressUpdates: tempProgress.slice(),
+                    underwriters: tempUnderwriters.slice()
+                };
             } else {
-                projectsContainer.innerHTML = filtered.map(p => `
-                    <div class="project-item" onclick="showDetail('${p.id}')">
-                        <div>
-                            <span class="name">${escHtml(p.issuerName)}</span>
-                            <span class="status ${p.status}">${statusMap(p.status)}</span>
-                            <span style="font-size:13px; color:#718096; margin-left:8px;">${escHtml(p.industry)||''}</span>
+                if (id) {
+                    const old = projects.find(p => p.id === id);
+                    if (old && old.mandateDetails) mandateDetails = old.mandateDetails;
+                }
+            }
+            let completionDetails = null;
+            if (status === 'completed') {
+                const pricingDate = document.getElementById('fPricingDate').value;
+                const pricingInfo = document.getElementById('fPricingInfo').value.trim();
+                const isPromoted = document.getElementById('fIsPromoted').value === '1';
+                const receivingBank = document.getElementById('fReceivingBank').value.trim();
+                const bndStatus = document.getElementById('fCompletedBndStatus').value;
+                const uwbLimit = document.getElementById('fCompletedUwbLimit').value.trim();
+                let summaryText = document.getElementById('fSummaryText').value.trim();
+                if (!summaryText) {
+                    summaryText = generateSummaryText(pricingDate, pricingInfo, isPromoted, tempPromotionRecords,
+                        receivingBank, tempBocInvestments, bndStatus, uwbLimit);
+                }
+                completionDetails = {
+                    pricingDate,
+                    pricingInfo,
+                    isPromoted,
+                    promotionRecords: tempPromotionRecords.slice(),
+                    receivingBank,
+                    bocInvestments: tempBocInvestments.slice(),
+                    bndStatus: bndStatus,
+                    uwbLimit: uwbLimit,
+                    summaryText
+                };
+            } else {
+                if (id) {
+                    const old = projects.find(p => p.id === id);
+                    if (old && old.completionDetails) completionDetails = old.completionDetails;
+                }
+            }
+            const projectData = {
+                ...baseData,
+                guaranteeDetails: guaranteeDetails,
+                mandateDetails: mandateDetails,
+                completionDetails: completionDetails,
+            };
+            saveProjectToDB(projectData, id).then(() => {
+                closeModal('projectModal');
+                loadProjects();
+            }).catch(err => {
+                alert('保存失败: ' + err.message);
+                console.error(err);
+            });
+        } catch (err) {
+            alert('保存失败: ' + err.message);
+            console.error(err);
+        }
+    }
+
+    function deleteProject(id) {
+        if (!confirm('确定要删除此项目吗？所有关联记录也将被删除。')) return;
+        deleteProjectFromDB(id).then(() => {
+            loadProjects();
+        }).catch(err => {
+            alert('删除失败: ' + err.message);
+            console.error(err);
+        });
+    }
+
+    // ================================================================
+    // 辅助切换
+    // ================================================================
+    function toggleGuaranteeDetails() {
+        const val = document.getElementById('fHasGuarantee').value;
+        document.getElementById('guaranteeDetails').style.display = (val === '1') ? 'block' : 'none';
+    }
+    function togglePromotionSection() {
+        const val = document.getElementById('fIsPromoted').value;
+        document.getElementById('promotionSection').style.display = (val === '1') ? 'block' : 'none';
+    }
+    function toggleUwbSection() {
+        const val = document.getElementById('fBnDStatus').value;
+        document.getElementById('uwbSection').style.display = (val === 'yes') ? 'block' : 'none';
+    }
+
+    function onStatusChange() {
+        const status = document.getElementById('fStatus').value;
+        const intentSection = document.getElementById('investmentIntentSection');
+        intentSection.style.display = (status === 'marketing' || status === 'mandated') ? 'block' : 'none';
+        document.getElementById('mandateSection').style.display = (status === 'mandated') ? 'block' : 'none';
+        document.getElementById('completedSection').style.display = (status === 'completed') ? 'block' : 'none';
+        if (status === 'completed') {
+            const bndStatus = document.getElementById('fBnDStatus').value;
+            const uwbLimit = document.getElementById('fUwbLimit').value;
+            document.getElementById('fCompletedBndStatus').value = bndStatus;
+            document.getElementById('fCompletedUwbLimit').value = uwbLimit;
+            document.getElementById('completedBndSection').style.display = 'block';
+            const summary = document.getElementById('fSummaryText');
+            if (!summary.value.trim()) generateSummary();
+        } else {
+            document.getElementById('completedBndSection').style.display = 'none';
+        }
+    }
+
+    // ================================================================
+    // 投资意向管理 (多条)
+    // ================================================================
+    function renderInvestmentIntents() {
+        const container = document.getElementById('investmentIntentsContainer');
+        if (!container) return;
+        if (tempInvestmentIntents.length === 0) {
+            container.innerHTML = '<div style="color:#a0aec0;font-size:13px;">暂无投资意向，请添加</div>';
+        } else {
+            container.innerHTML = tempInvestmentIntents.map((item, i) => `
+                <div class="sub-item">
+                    <div class="info">
+                        <strong>${escHtml(item.investor)||'未命名'}</strong>
+                        ${item.percent ? ` | ${item.percent}%` : ''}
+                        ${item.issueMin || item.issueMax ? ` | 规模: ${escHtml(item.issueMin||'')} ~ ${escHtml(item.issueMax||'')}` : ''}
+                        ${item.checkBoc ? ' | ✅ 检查额度' : ''}
+                    </div>
+                    <div>
+                        <button class="btn btn-primary btn-xs" onclick="editInvestmentIntent(${i})">编辑</button>
+                        <button class="btn btn-danger btn-xs" onclick="deleteInvestmentIntent(${i})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    function addInvestmentIntent() {
+        document.getElementById('intentEditIndex').value = '-1';
+        document.getElementById('intentForm').reset();
+        openModal('intentModal');
+    }
+
+    function editInvestmentIntent(index) {
+        const item = tempInvestmentIntents[index];
+        if (!item) return;
+        document.getElementById('intentEditIndex').value = index;
+        document.getElementById('fIntentInvestor').value = item.investor || '';
+        document.getElementById('fIntentPercent').value = item.percent || '';
+        document.getElementById('fIntentIssueMin').value = item.issueMin || '';
+        document.getElementById('fIntentIssueMax').value = item.issueMax || '';
+        document.getElementById('fIntentCheckBOC').checked = item.checkBoc || false;
+        openModal('intentModal');
+    }
+
+    function saveInvestmentIntent(e) {
+        e.preventDefault();
+        const index = parseInt(document.getElementById('intentEditIndex').value);
+        const investor = document.getElementById('fIntentInvestor').value.trim();
+        const percent = parseFloat(document.getElementById('fIntentPercent').value) || 0;
+        const issueMin = document.getElementById('fIntentIssueMin').value.trim();
+        const issueMax = document.getElementById('fIntentIssueMax').value.trim();
+        const checkBoc = document.getElementById('fIntentCheckBOC').checked;
+        if (!investor) { alert('请输入投资主体'); return; }
+        const intent = { investor, percent, issueMin, issueMax, checkBoc };
+        if (index === -1) {
+            tempInvestmentIntents.push(intent);
+        } else {
+            tempInvestmentIntents[index] = intent;
+        }
+        closeModal('intentModal');
+        renderInvestmentIntents();
+    }
+
+    function deleteInvestmentIntent(index) {
+        if (!confirm('确定删除此投资意向吗？')) return;
+        tempInvestmentIntents.splice(index, 1);
+        renderInvestmentIntents();
+    }
+
+    // ================================================================
+    // 子列表管理 (委任更新、债券、承销商、进度、宣传、BOC投资)
+    // ================================================================
+    function renderSubLists() {
+        // 更新列表
+        const updateContainer = document.getElementById('mandateUpdatesContainer');
+        if (updateContainer) {
+            if (tempUpdates.length === 0) {
+                updateContainer.innerHTML = '<div style="color:#a0aec0;font-size:13px;">暂无更新记录</div>';
+            } else {
+                updateContainer.innerHTML = tempUpdates.map((u, i) => {
+                    let display = u.expectedDate ? formatDate(u.expectedDate) : (u.expectedYear && u
+                        .expectedQuarter ? u.expectedYear + ' ' + u.expectedQuarter : '-');
+                    return `
+                        <div class="sub-item">
+                            <div class="info">
+                                <strong>${formatDate(u.date)}</strong> 预计: ${display}<br>
+                                <span style="font-size:12px;color:#4a5568;">原因: ${escHtml(u.reason)}</span>
+                            </div>
+                            <div>
+                                <button class="btn btn-primary btn-xs" onclick="editMandateUpdate(${i})">编辑</button>
+                                <button class="btn btn-danger btn-xs" onclick="deleteMandateUpdate(${i})">删除</button>
+                            </div>
                         </div>
-                        <div class="actions" onclick="event.stopPropagation();">
-                            <button class="btn btn-primary btn-sm" onclick="editProject('${p.id}')">编辑</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteProject('${p.id}')">删除</button>
+                    `;
+                }).join('');
+            }
+        }
+        // 债券列表
+        const bondContainer = document.getElementById('bondsContainer');
+        if (bondContainer) {
+            if (tempBonds.length === 0) {
+                bondContainer.innerHTML = '<div style="color:#a0aec0;font-size:13px;">暂无债券</div>';
+            } else {
+                bondContainer.innerHTML = tempBonds.map((b, i) => `
+                    <div class="sub-item">
+                        <div class="info">
+                            <strong>规模:</strong> ${escHtml(b.size)} &nbsp;|&nbsp; <strong>货币:</strong> ${escHtml(b.currency)} &nbsp;|&nbsp; <strong>年期:</strong> ${escHtml(b.tenor)}
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-xs" onclick="editBond(${i})">编辑</button>
+                            <button class="btn btn-danger btn-xs" onclick="deleteBond(${i})">删除</button>
                         </div>
                     </div>
                 `).join('');
             }
-            updateStats();
         }
-
-        // ================================================================
-        // 详情
-        // ================================================================
-        function showDetail(id) {
-            const p = projects.find(x => x.id === id);
-            if (!p) return;
-            const content = document.getElementById('detailContent');
-            content.innerHTML = `
-                <div class="detail-panel">
-                    <div class="field-row"><span class="label">发行人</span><span class="value">${escHtml(p.issuerName)}</span></div>
-                    <div class="field-row"><span class="label">状态</span><span class="value">${statusMap(p.status)}</span></div>
-                    <div class="field-row"><span class="label">行业</span><span class="value">${escHtml(p.industry)||'-'}</span></div>
-                    <div class="field-row"><span class="label">外部评级</span><span class="value">${escHtml(p.externalRating)||'-'}</span></div>
-                    <div class="field-row"><span class="label">内部评级</span><span class="value">${escHtml(p.bankInternalRating)||'-'}</span></div>
-                    <div class="field-row"><span class="label">近期发行</span><span class="value">${escHtml(p.recentBondIssuance)||'-'}</span></div>
-                    <div class="field-row"><span class="label">最近到期</span><span class="value">${escHtml(p.recentMaturityProject)||'-'}</span></div>
-                    <div class="field-row"><span class="label">预计规模</span><span class="value">${escHtml(p.expectedScale)||'-'}</span></div>
-                    <div class="field-row"><span class="label">额度</span><span class="value">${escHtml(p.creditLimit)||'-'}</span></div>
-                </div>
-            `;
-            openModal('detailModal');
-        }
-
-        // ================================================================
-        // 新增/编辑/删除
-        // ================================================================
-        function openAddModal() {
-            document.getElementById('modalTitle').textContent = '新增项目';
-            document.getElementById('editId').value = '';
-            document.getElementById('projectForm').reset();
-            document.getElementById('fStatus').value = 'marketing';
-            openModal('projectModal');
-        }
-
-        function editProject(id) {
-            const p = projects.find(x => x.id === id);
-            if (!p) return;
-            document.getElementById('modalTitle').textContent = '编辑项目';
-            document.getElementById('editId').value = id;
-            document.getElementById('fStatus').value = p.status || 'marketing';
-            document.getElementById('fIssuerName').value = p.issuerName || '';
-            document.getElementById('fIndustry').value = p.industry || '其他';
-            document.getElementById('fExternalRating').value = p.externalRating || '';
-            document.getElementById('fBankRating').value = p.bankInternalRating || '';
-            document.getElementById('fRecentBond').value = p.recentBondIssuance || '';
-            document.getElementById('fRecentMaturity').value = p.recentMaturityProject || '';
-            document.getElementById('fExpectedScale').value = p.expectedScale || '';
-            document.getElementById('fCreditLimit').value = p.creditLimit || '';
-            openModal('projectModal');
-        }
-
-        function saveProject(e) {
-            e.preventDefault();
-            try {
-                const id = document.getElementById('editId').value;
-                const data = {
-                    issuerName: document.getElementById('fIssuerName').value.trim(),
-                    status: document.getElementById('fStatus').value,
-                    industry: document.getElementById('fIndustry').value,
-                    externalRating: document.getElementById('fExternalRating').value.trim(),
-                    bankInternalRating: document.getElementById('fBankRating').value.trim(),
-                    recentBondIssuance: document.getElementById('fRecentBond').value.trim(),
-                    recentMaturityProject: document.getElementById('fRecentMaturity').value.trim(),
-                    expectedScale: document.getElementById('fExpectedScale').value.trim(),
-                    creditLimit: document.getElementById('fCreditLimit').value.trim(),
-                };
-                if (!data.issuerName) {
-                    alert('请输入发行人名称');
-                    return;
-                }
-                // 保留已有扩展字段（如投资意向等）
-                if (id) {
-                    const old = projects.find(p => p.id === id);
-                    if (old) {
-                        Object.keys(old).forEach(k => {
-                            if (!(k in data) && k !== 'id' && k !== 'user_id') {
-                                data[k] = old[k];
-                            }
-                        });
-                    }
-                }
-                saveProjectToDB(data, id).then(() => {
-                    closeModal('projectModal');
-                    loadProjects();
-                }).catch(err => {
-                    alert('保存失败: ' + err.message);
-                    console.error(err);
-                });
-            } catch (err) {
-                alert('保存失败: ' + err.message);
-                console.error(err);
+        // 进度更新列表
+        const progressContainer = document.getElementById('progressUpdatesContainer');
+        if (progressContainer) {
+            if (tempProgress.length === 0) {
+                progressContainer.innerHTML = '<div style="color:#a0aec0;font-size:13px;">暂无进度更新</div>';
+            } else {
+                progressContainer.innerHTML = tempProgress.map((pr, i) => `
+                    <div class="sub-item">
+                        <div class="info">
+                            <strong>${formatDate(pr.date)}</strong><br>
+                            <span>${escHtml(pr.content)}</span>
+                            ${pr.attachment ? `<br><span style="font-size:12px;color:#2b6cb0;">📎 ${escHtml(pr.attachment)}</span>` : ''}
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-xs" onclick="editProgressUpdate(${i})">编辑</button>
+                            <button class="btn btn-danger btn-xs" onclick="deleteProgressUpdate(${i})">删除</button>
+                        </div>
+                    </div>
+                `).join('');
             }
         }
-
-        function deleteProject(id) {
-            if (!confirm('确定删除此项目吗？')) return;
-            deleteProjectFromDB(id).then(() => {
-                loadProjects();
-            }).catch(err => {
-                alert('删除失败: ' + err.message);
-                console.error(err);
-            });
+        // 承销商列表
+        const uwContainer = document.getElementById('underwritersContainer');
+        if (uwContainer) {
+            if (tempUnderwriters.length === 0) {
+                uwContainer.innerHTML = '<div style="color:#a0aec0;font-size:13px;">暂无承销商</div>';
+            } else {
+                uwContainer.innerHTML = tempUnderwriters.map((u, i) => `
+                    <div class="sub-item">
+                        <div class="info">
+                            <strong>${escHtml(u.role)}</strong>: ${escHtml(u.name)}
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-xs" onclick="editUnderwriter(${i})">编辑</button>
+                            <button class="btn btn-danger btn-xs" onclick="deleteUnderwriter(${i})">删除</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
-
-        // ================================================================
-        // 导入/导出
-        // ================================================================
-        function exportData() {
-            const blob = new Blob([JSON.stringify(projects, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'deal-tracker-backup.json';
-            a.click();
-            URL.revokeObjectURL(url);
+        // 宣传记录
+        const promoContainer = document.getElementById('promotionRecordsContainer');
+        if (promoContainer) {
+            if (tempPromotionRecords.length === 0) {
+                promoContainer.innerHTML = '<div style="color:#a0aec0;font-size:13px;">暂无宣传记录</div>';
+            } else {
+                promoContainer.innerHTML = tempPromotionRecords.map((pr, i) => `
+                    <div class="sub-item">
+                        <div class="info">
+                            <strong>${escHtml(pr.channel)}</strong><br>
+                            <span style="white-space:pre-wrap;">${escHtml(pr.text)}</span>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-xs" onclick="editPromotionRecord(${i})">编辑</button>
+                            <button class="btn btn-danger btn-xs" onclick="deletePromotionRecord(${i})">删除</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
+        // 中国银行投资主体
+        const bocContainer = document.getElementById('bocInvestmentContainer');
+        if (bocContainer) {
+            if (tempBocInvestments.length === 0) {
+                bocContainer.innerHTML = '<div style="color:#a0aec0;font-size:13px;">暂无投资主体</div>';
+            } else {
+                bocContainer.innerHTML = tempBocInvestments.map((b, i) => `
+                    <div class="sub-item">
+                        <div class="info">
+                            <strong>${escHtml(b.investor)}</strong><br>
+                            投资量: ${escHtml(b.amount)||'-'} | 实际需求: ${escHtml(b.actual)||'-'} | 可分配: ${escHtml(b.alloc)||'-'}
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-xs" onclick="editBocInvestment(${i})">编辑</button>
+                            <button class="btn btn-danger btn-xs" onclick="deleteBocInvestment(${i})">删除</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    }
 
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+    // ================================================================
+    // 子项 CRUD
+    // ================================================================
+    function addMandateUpdate() { document.getElementById('updateEditIndex').value = '-1';
+        document.getElementById('updateForm').reset();
+        openModal('updateModal'); }
+    function editMandateUpdate(index) {
+        const u = tempUpdates[index];
+        if (!u) return;
+        document.getElementById('updateEditIndex').value = index;
+        document.getElementById('fUpdateDate').value = u.date || '';
+        document.getElementById('fExpectedDate').value = u.expectedDate || '';
+        document.getElementById('fExpectedYear').value = u.expectedYear || '';
+        document.getElementById('fExpectedQuarter').value = u.expectedQuarter || '';
+        document.getElementById('fUpdateReason').value = u.reason || '';
+        openModal('updateModal');
+    }
+    function saveMandateUpdate(e) {
+        e.preventDefault();
+        const index = parseInt(document.getElementById('updateEditIndex').value);
+        const date = document.getElementById('fUpdateDate').value;
+        const expectedDate = document.getElementById('fExpectedDate').value;
+        const expectedYear = document.getElementById('fExpectedYear').value;
+        const expectedQuarter = document.getElementById('fExpectedQuarter').value;
+        const reason = document.getElementById('fUpdateReason').value.trim();
+        if (!date || !reason) { alert('请填写更新日期和原因'); return; }
+        if (!expectedDate && !(expectedYear && expectedQuarter)) { alert('请填写预计发行日期或选择年份+季度'); return; }
+        const update = { date, reason };
+        if (expectedDate) update.expectedDate = expectedDate;
+        else { update.expectedYear = expectedYear;
+            update.expectedQuarter = expectedQuarter; }
+        if (index === -1) tempUpdates.push(update);
+        else tempUpdates[index] = update;
+        closeModal('updateModal');
+        renderSubLists();
+    }
+    function deleteMandateUpdate(index) { if (!confirm('确定删除此更新吗？')) return;
+        tempUpdates.splice(index, 1);
+        renderSubLists(); }
+
+    function addBond() { document.getElementById('bondEditIndex').value = '-1';
+        document.getElementById('bondForm').reset();
+        openModal('bondModal'); }
+    function editBond(index) {
+        const b = tempBonds[index];
+        if (!b) return;
+        document.getElementById('bondEditIndex').value = index;
+        document.getElementById('fBondSize').value = b.size || '';
+        document.getElementById('fBondCurrency').value = b.currency || '';
+        document.getElementById('fBondTenor').value = b.tenor || '';
+        openModal('bondModal');
+    }
+    function saveBond(e) {
+        e.preventDefault();
+        const index = parseInt(document.getElementById('bondEditIndex').value);
+        const size = document.getElementById('fBondSize').value.trim();
+        const currency = document.getElementById('fBondCurrency').value.trim();
+        const tenor = document.getElementById('fBondTenor').value.trim();
+        if (!size || !currency || !tenor) { alert('请完整填写所有字段'); return; }
+        const bond = { size, currency, tenor };
+        if (index === -1) tempBonds.push(bond);
+        else tempBonds[index] = bond;
+        closeModal('bondModal');
+        renderSubLists();
+    }
+    function deleteBond(index) { if (!confirm('确定删除此债券吗？')) return;
+        tempBonds.splice(index, 1);
+        renderSubLists(); }
+
+    function addUnderwriter() { document.getElementById('underwriterEditIndex').value = '-1';
+        document.getElementById('underwriterForm').reset();
+        openModal('underwriterModal'); }
+    function editUnderwriter(index) {
+        const u = tempUnderwriters[index];
+        if (!u) return;
+        document.getElementById('underwriterEditIndex').value = index;
+        document.getElementById('fUnderwriterRole').value = u.role || 'JGC';
+        document.getElementById('fUnderwriterName').value = u.name || '';
+        openModal('underwriterModal');
+    }
+    function saveUnderwriter(e) {
+        e.preventDefault();
+        const index = parseInt(document.getElementById('underwriterEditIndex').value);
+        const role = document.getElementById('fUnderwriterRole').value;
+        const name = document.getElementById('fUnderwriterName').value.trim();
+        if (!name) { alert('请输入承销商名称'); return; }
+        const uw = { role, name };
+        if (index === -1) tempUnderwriters.push(uw);
+        else tempUnderwriters[index] = uw;
+        closeModal('underwriterModal');
+        renderSubLists();
+    }
+    function deleteUnderwriter(index) { if (!confirm('确定删除此承销商吗？')) return;
+        tempUnderwriters.splice(index, 1);
+        renderSubLists(); }
+
+    function addProgressUpdate() { document.getElementById('progressEditIndex').value = '-1';
+        document.getElementById('progressForm').reset();
+        openModal('progressModal'); }
+    function editProgressUpdate(index) {
+        const pr = tempProgress[index];
+        if (!pr) return;
+        document.getElementById('progressEditIndex').value = index;
+        document.getElementById('fProgressDate').value = pr.date || '';
+        document.getElementById('fProgressContent').value = pr.content || '';
+        openModal('progressModal');
+    }
+    function saveProgressUpdate(e) {
+        e.preventDefault();
+        const index = parseInt(document.getElementById('progressEditIndex').value);
+        const date = document.getElementById('fProgressDate').value;
+        const content = document.getElementById('fProgressContent').value.trim();
+        const fileInput = document.getElementById('fProgressFile');
+        let attachment = '';
+        if (fileInput.files.length > 0) attachment = fileInput.files[0].name;
+        if (!date || !content) { alert('请填写日期和内容'); return; }
+        const progress = { date, content, attachment };
+        if (index === -1) tempProgress.push(progress);
+        else tempProgress[index] = progress;
+        closeModal('progressModal');
+        renderSubLists();
+    }
+    function deleteProgressUpdate(index) { if (!confirm('确定删除此进度更新吗？')) return;
+        tempProgress.splice(index, 1);
+        renderSubLists(); }
+
+    function addPromotionRecord() { document.getElementById('promotionEditIndex').value = '-1';
+        document.getElementById('promotionForm').reset();
+        openModal('promotionModal'); }
+    function editPromotionRecord(index) {
+        const pr = tempPromotionRecords[index];
+        if (!pr) return;
+        document.getElementById('promotionEditIndex').value = index;
+        document.getElementById('fPromotionChannel').value = pr.channel || '新闻';
+        document.getElementById('fPromotionText').value = pr.text || '';
+        openModal('promotionModal');
+    }
+    function savePromotionRecord(e) {
+        e.preventDefault();
+        const index = parseInt(document.getElementById('promotionEditIndex').value);
+        const channel = document.getElementById('fPromotionChannel').value;
+        const text = document.getElementById('fPromotionText').value.trim();
+        if (!text) { alert('请填写宣传文字'); return; }
+        const record = { channel, text };
+        if (index === -1) tempPromotionRecords.push(record);
+        else tempPromotionRecords[index] = record;
+        closeModal('promotionModal');
+        renderSubLists();
+    }
+    function deletePromotionRecord(index) { if (!confirm('确定删除此宣传记录吗？')) return;
+        tempPromotionRecords.splice(index, 1);
+        renderSubLists(); }
+
+    function addBocInvestment() { document.getElementById('bocEditIndex').value = '-1';
+        document.getElementById('bocForm').reset();
+        openModal('bocModal'); }
+    function editBocInvestment(index) {
+        const b = tempBocInvestments[index];
+        if (!b) return;
+        document.getElementById('bocEditIndex').value = index;
+        document.getElementById('fBocInvestor').value = b.investor || '';
+        document.getElementById('fBocAmount').value = b.amount || '';
+        document.getElementById('fBocActual').value = b.actual || '';
+        document.getElementById('fBocAlloc').value = b.alloc || '';
+        openModal('bocModal');
+    }
+    function saveBocInvestment(e) {
+        e.preventDefault();
+        const index = parseInt(document.getElementById('bocEditIndex').value);
+        const investor = document.getElementById('fBocInvestor').value.trim();
+        const amount = document.getElementById('fBocAmount').value.trim();
+        const actual = document.getElementById('fBocActual').value.trim();
+        const alloc = document.getElementById('fBocAlloc').value.trim();
+        if (!investor) { alert('请输入投资主体'); return; }
+        const boc = { investor, amount, actual, alloc };
+        if (index === -1) tempBocInvestments.push(boc);
+        else tempBocInvestments[index] = boc;
+        closeModal('bocModal');
+        renderSubLists();
+    }
+    function deleteBocInvestment(index) { if (!confirm('确定删除此投资主体吗？')) return;
+        tempBocInvestments.splice(index, 1);
+        renderSubLists(); }
+
+    // ================================================================
+    // 完成信息辅助
+    // ================================================================
+    function generateSummary() {
+        const date = document.getElementById('fPricingDate').value;
+        const info = document.getElementById('fPricingInfo').value.trim();
+        const isPromoted = document.getElementById('fIsPromoted').value === '1';
+        const receivingBank = document.getElementById('fReceivingBank').value.trim();
+        const bndStatus = document.getElementById('fCompletedBndStatus').value;
+        const uwbLimit = document.getElementById('fCompletedUwbLimit').value.trim();
+        const promoRecords = tempPromotionRecords.slice();
+        const bocInvestments = tempBocInvestments.slice();
+        const text = generateSummaryText(date, info, isPromoted, promoRecords, receivingBank, bocInvestments, bndStatus,
+            uwbLimit);
+        document.getElementById('fSummaryText').value = text;
+    }
+
+    function generateSummaryText(date, info, isPromoted, promoRecords, bank, bocInvestments, bndStatus, uwbLimit) {
+        let parts = [];
+        if (date) parts.push(`于 ${formatDate(date)} 完成定价`);
+        if (info) parts.push(`定价信息：${info}`);
+        if (isPromoted) {
+            let promoText = promoRecords.map(r => `${r.channel}：${r.text}`).join('；');
+            if (promoText) parts.push(`宣传推广（${promoText}）`);
+            else parts.push('已进行宣传推广');
+        } else {
+            parts.push('未进行宣传推广');
+        }
+        if (bank) parts.push(`收款行：${bank}`);
+        if (bocInvestments.length) {
+            let bocStr = bocInvestments.map(b =>
+                `${b.investor} 投资${b.amount||'0'}，实际需求${b.actual||'0'}，可分配${b.alloc||'0'}`
+            ).join('；');
+            parts.push(`中国银行投资情况：${bocStr}`);
+        }
+        const bndMap = { 'yes': '是', 'no': '否', 'pending': '待定' };
+        parts.push(`BnD状态：${bndMap[bndStatus]||'否'}${uwbLimit ? '，UWB额度：'+uwbLimit : ''}`);
+        return parts.join('；') + '。';
+    }
+
+    // ================================================================
+    // 通用记录 CRUD (支持文件上传)
+    // ================================================================
+    function openRecordModal(projectId, type) {
+        document.getElementById('recordProjectId').value = projectId;
+        document.getElementById('recordType').value = type;
+        const typeMap = {
+            'marketingRecords': '营销记录',
+            'workRecords': '工作记录',
+            'meetingMinutes': '开会纪要'
+        };
+        document.getElementById('recordModalTitle').textContent = '添加 ' + (typeMap[type] || '记录');
+        const attendeesGroup = document.getElementById('recordAttendeesGroup');
+        const fileGroup = document.getElementById('recordFileGroup');
+        if (type === 'meetingMinutes') {
+            attendeesGroup.style.display = 'block';
+            document.getElementById('fRecordAttendees').required = true;
+            fileGroup.style.display = 'block';
+        } else {
+            attendeesGroup.style.display = 'none';
+            document.getElementById('fRecordAttendees').required = false;
+            fileGroup.style.display = 'none';
+        }
+        document.getElementById('recordForm').reset();
+        openModal('recordModal');
+    }
+
+    function saveRecord(e) {
+        e.preventDefault();
+        const projectId = document.getElementById('recordProjectId').value;
+        const type = document.getElementById('recordType').value;
+        const time = document.getElementById('fRecordTime').value;
+        const content = document.getElementById('fRecordContent').value.trim();
+        let attendees = document.getElementById('fRecordAttendees').value.trim();
+        let attachment = '';
+        const fileInput = document.getElementById('fRecordFile');
+        if (fileInput && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
             const reader = new FileReader();
             reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (Array.isArray(data)) {
-                        if (confirm('将覆盖当前所有数据，确定继续吗？')) {
-                            const promises = data.map(p => saveProjectToDB(p, p.id || null));
-                            Promise.all(promises).then(() => {
-                                loadProjects();
-                                alert('导入成功！');
-                            }).catch(err => {
-                                alert('导入失败: ' + err.message);
-                                console.error(err);
-                            });
-                        }
-                    } else {
-                        alert('无效的数据格式');
-                    }
-                } catch (err) {
-                    alert('解析文件失败: ' + err.message);
-                    console.error(err);
-                }
+                attachment = file.name + '|' + e.target.result;
+                saveRecordData(projectId, type, time, content, attendees, attachment);
             };
-            reader.readAsText(file);
-            event.target.value = '';
+            reader.readAsDataURL(file);
+            return;
+        } else {
+            saveRecordData(projectId, type, time, content, attendees, '');
         }
+    }
 
-        // ================================================================
-        // 模态框控制
-        // ================================================================
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
-            document.body.style.overflow = 'hidden';
+    function saveRecordData(projectId, type, time, content, attendees, attachment) {
+        if (!time || !content) { alert('请填写完整信息'); return; }
+        if (type === 'meetingMinutes' && !attendees) { alert('请输入参会人'); return; }
+        const p = projects.find(x => x.id === projectId);
+        if (!p) return;
+        if (!p[type]) p[type] = [];
+        const record = { date: time, content };
+        if (type === 'meetingMinutes') {
+            record.attendees = attendees;
+            if (attachment) record.attachment = attachment;
         }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        document.querySelectorAll('.modal-overlay').forEach(el => {
-            el.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
+        p[type].push(record);
+        // 更新到数据库
+        saveProjectToDB(p, p.id).then(() => {
+            loadProjects();
+        }).catch(err => {
+            alert('保存记录失败: ' + err.message);
         });
+        closeModal('recordModal');
+    }
 
-        // ================================================================
-        // 暴露全局函数供 HTML 调用
-        // ================================================================
-        window.openAddModal = openAddModal;
-        window.editProject = editProject;
-        window.deleteProject = deleteProject;
-        window.showDetail = showDetail;
-        window.renderProjects = renderProjects;
-        window.exportData = exportData;
-        window.importData = importData;
-        window.closeModal = closeModal;
-        window.openModal = openModal;
-        window.saveProject = saveProject;
+    function deleteRecord(projectId, type, date) {
+        if (!confirm('确定删除此记录吗？')) return;
+        const p = projects.find(x => x.id === projectId);
+        if (!p) return;
+        if (!p[type]) return;
+        p[type] = p[type].filter(r => r.date !== date);
+        saveProjectToDB(p, p.id).then(() => {
+            loadProjects();
+        }).catch(err => {
+            alert('删除记录失败: ' + err.message);
+        });
+    }
 
-        // ================================================================
-        // 初始化
-        // ================================================================
-        window.onload = function() {
-            console.log('🚀 页面加载完成');
-            initAuth();
+    function downloadAttachment(projectId, type, date) {
+        const p = projects.find(x => x.id === projectId);
+        if (!p) return;
+        const rec = p[type].find(r => r.date === date);
+        if (!rec || !rec.attachment) return;
+        const parts = rec.attachment.split('|');
+        if (parts.length !== 2) return;
+        const filename = parts[0];
+        const dataUrl = parts[1];
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // ================================================================
+    // 其他功能 (提醒、导入导出、Bloomberg等)
+    // ================================================================
+    function updateReminders() {
+        const now = new Date();
+        const sixMonthsLater = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000);
+        const reminders = [];
+        projects.forEach(p => {
+            if (p.status === 'marketing' && p.recentMaturityProject) {
+                const match = p.recentMaturityProject.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+                if (match) {
+                    const dt = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+                    if (dt >= now && dt <= sixMonthsLater) {
+                        reminders.push({ issuer: p.issuerName, maturity: p.recentMaturityProject });
+                    }
+                }
+            }
+        });
+        const bar = document.getElementById('reminderBar');
+        const list = document.getElementById('reminderList');
+        if (reminders.length === 0) {
+            bar.style.display = 'none';
+        } else {
+            bar.style.display = 'flex';
+            list.innerHTML = reminders.map(r => 
+                `<span class="reminder-item"><span class="issuer">${escHtml(r.issuer)}</span> 到期: ${escHtml(r.maturity)}</span>`
+            ).join('');
+        }
+    }
+
+    function updateBloombergReminder() {
+        const last = localStorage.getItem('bloombergLastUpload');
+        const now = new Date();
+        let show = true;
+        let lastDate = null;
+        if (last) {
+            lastDate = new Date(last);
+            const diffDays = (now - lastDate) / (1000 * 60 * 60 * 24);
+            if (diffDays < 180) show = false;
+        }
+        const el = document.getElementById('bloombergReminder');
+        const info = document.getElementById('bloombergLastUpload');
+        if (show) {
+            el.style.display = 'block';
+            info.textContent = last ? `上次上传: ${lastDate.toLocaleDateString()}` : '从未上传';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
+    function recordBloombergUpload() {
+        localStorage.setItem('bloombergLastUpload', new Date().toISOString());
+        updateBloombergReminder();
+        alert('已记录上传时间，下次提醒将在6个月后。');
+    }
+
+    function handleExcelUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const status = document.getElementById('uploadStatus');
+        status.textContent = '正在解析...';
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(firstSheet);
+                if (!json || json.length === 0) { status.textContent = '❌ 未找到有效数据'; return; }
+                let issuerCol = null, maturityCol = null;
+                const headers = Object.keys(json[0]);
+                const issuerKeywords = ['发行人', '名称', 'issuer', '公司'];
+                const maturityKeywords = ['到期', '项目', 'maturity', '期限'];
+                for (const h of headers) {
+                    const lower = h.toLowerCase();
+                    if (!issuerCol && issuerKeywords.some(k => lower.includes(k))) issuerCol = h;
+                    if (!maturityCol && maturityKeywords.some(k => lower.includes(k))) maturityCol = h;
+                }
+                if (!issuerCol || !maturityCol) {
+                    if (headers.length >= 2) { issuerCol = headers[0];
+                        maturityCol = headers[1]; } else {
+                        status.textContent = '❌ 无法自动识别列，请确保包含发行人名称和到期项目列';
+                        return;
+                    }
+                }
+                let updated = 0;
+                json.forEach(row => {
+                    const issuer = String(row[issuerCol] || '').trim();
+                    const maturity = String(row[maturityCol] || '').trim();
+                    if (!issuer || !maturity) return;
+                    const project = projects.find(p => p.issuerName === issuer);
+                    if (project) {
+                        project.recentMaturityProject = maturity;
+                        updated++;
+                    }
+                });
+                // 保存所有更新到数据库
+                projects.forEach(p => {
+                    saveProjectToDB(p, p.id).catch(err => console.error(err));
+                });
+                renderProjects();
+                status.textContent = `✅ 导入完成，更新了 ${updated} 个项目的到期信息`;
+            } catch (err) {
+                console.error(err);
+                status.textContent = '❌ 解析失败: ' + err.message;
+            }
         };
-    </script>
+        reader.readAsArrayBuffer(file);
+        event.target.value = '';
+    }
+
+    function exportData() {
+        const data = JSON.stringify(projects, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'deal-tracker-backup.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (Array.isArray(data)) {
+                    if (confirm('将覆盖当前所有数据，确定继续吗？')) {
+                        const promises = data.map(p => saveProjectToDB(p, p.id || null));
+                        Promise.all(promises).then(() => {
+                            loadProjects();
+                            alert('导入成功！');
+                        }).catch(err => {
+                            alert('导入失败: ' + err.message);
+                            console.error(err);
+                        });
+                    }
+                } else {
+                    alert('无效的数据格式');
+                }
+            } catch (err) {
+                alert('解析文件失败: ' + err.message);
+                console.error(err);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    // ================================================================
+    // 模态框控制
+    // ================================================================
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // 点击遮罩关闭
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+
+    // ================================================================
+    // 初始化
+    // ================================================================
+    window.onload = function() {
+        console.log('🚀 页面加载完成');
+        initAuth();
+    };
+
+    // 暴露全局函数
+    window.openAddModal = openAddModal;
+    window.editProject = editProject;
+    window.deleteProject = deleteProject;
+    window.toggleExpand = toggleExpand;
+    window.onStatusChange = onStatusChange;
+    window.toggleGuaranteeDetails = toggleGuaranteeDetails;
+    window.togglePromotionSection = togglePromotionSection;
+    window.toggleUwbSection = toggleUwbSection;
+    window.addInvestmentIntent = addInvestmentIntent;
+    window.editInvestmentIntent = editInvestmentIntent;
+    window.deleteInvestmentIntent = deleteInvestmentIntent;
+    window.renderInvestmentIntents = renderInvestmentIntents;
+    window.addMandateUpdate = addMandateUpdate;
+    window.editMandateUpdate = editMandateUpdate;
+    window.deleteMandateUpdate = deleteMandateUpdate;
+    window.addBond = addBond;
+    window.editBond = editBond;
+    window.deleteBond = deleteBond;
+    window.addProgressUpdate = addProgressUpdate;
+    window.editProgressUpdate = editProgressUpdate;
+    window.deleteProgressUpdate = deleteProgressUpdate;
+    window.addUnderwriter = addUnderwriter;
+    window.editUnderwriter = editUnderwriter;
+    window.deleteUnderwriter = deleteUnderwriter;
+    window.addPromotionRecord = addPromotionRecord;
+    window.editPromotionRecord = editPromotionRecord;
+    window.deletePromotionRecord = deletePromotionRecord;
+    window.addBocInvestment = addBocInvestment;
+    window.editBocInvestment = editBocInvestment;
+    window.deleteBocInvestment = deleteBocInvestment;
+    window.generateSummary = generateSummary;
+    window.renderSubLists = renderSubLists;
+    window.openRecordModal = openRecordModal;
+    window.saveRecord = saveRecord;
+    window.deleteRecord = deleteRecord;
+    window.closeModal = closeModal;
+    window.openModal = openModal;
+    window.handleExcelUpload = handleExcelUpload;
+    window.recordBloombergUpload = recordBloombergUpload;
+    window.exportData = exportData;
+    window.importData = importData;
+    window.downloadAttachment = downloadAttachment;
+    window.logout = logout;
+
+    console.log('✅ Deal Tracker 已启动，数据存储在 Supabase 云端。');
+</script>
 </body>
 </html>
