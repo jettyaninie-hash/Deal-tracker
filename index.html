@@ -118,7 +118,8 @@
     // 配置 - 请修改为您的 Supabase 信息
     // ================================================================
     const SUPABASE_URL = 'https://dagdwpbevseqkozodfjl.supabase.co';   // 修改
-    const SUPABASE_ANON_KEY = 'sb_publishable_nA2QCdW5HvCRBYvYVcg4jQ_Y0d6R_rB';                // 修改
+    const SUPABASE_ANON_KEY = 'sb_publishable_nA2QCdW5HvCRBYvYVcg4jQ_Y0d6R_rB'; // 修改
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ================================================================
     // 初始化 Supabase 客户端
