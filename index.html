@@ -497,6 +497,76 @@
             background: #ebf8ff;
             border-color: #2b6cb0;
         }
+        .inline-record-form {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 8px;
+        }
+        .inline-record-form .form-row-inline {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .inline-record-form .form-row-inline input[type="date"] {
+            width: 160px;
+            padding: 6px 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .inline-record-form .form-row-inline textarea {
+            flex: 1;
+            min-width: 200px;
+            padding: 6px 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .inline-record-form .form-row-inline input[type="file"] {
+            flex: 1;
+            min-width: 150px;
+            padding: 4px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+        }
+        .inline-record-form .form-row-inline .btn {
+            padding: 6px 16px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .inline-record-form .form-row-inline .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        .inline-record-form .form-row-inline .btn-success:hover {
+            background: #38a169;
+        }
+        .inline-record-form .form-row-inline .btn-outline {
+            background: transparent;
+            border: 2px solid #2b6cb0;
+            color: #2b6cb0;
+        }
+        .inline-record-form .form-row-inline .btn-outline:hover {
+            background: #ebf8ff;
+        }
+        .inline-record-form .form-row-inline .record-attendees-input {
+            width: 140px;
+            padding: 6px 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .inline-record-form .file-label {
+            font-size: 12px;
+            color: #718096;
+        }
         .mt-8 {
             margin-top: 8px;
         }
@@ -537,29 +607,6 @@
             color: #a0aec0;
             margin-left: 8px;
         }
-        .deepseek-section {
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px;
-            margin: 12px 0;
-        }
-        .deepseek-section .form-group {
-            margin-bottom: 12px;
-        }
-        .deepseek-section .form-group label {
-            font-weight: 600;
-            font-size: 13px;
-        }
-        .deepseek-section input[type="text"] {
-            width: 100%;
-            padding: 8px 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 6px;
-        }
-        .deepseek-section button {
-            margin-top: 8px;
-        }
         @media (max-width: 640px) {
             .app-header {
                 flex-direction: column;
@@ -575,6 +622,14 @@
             .project-item .actions {
                 margin-top: 8px;
                 text-align: right;
+            }
+            .inline-record-form .form-row-inline {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .inline-record-form .form-row-inline input[type="date"],
+            .inline-record-form .form-row-inline .record-attendees-input {
+                width: 100%;
             }
         }
     </style>
@@ -737,11 +792,6 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label>所属处室</label>
-                        <input type="text" id="fDepartment" placeholder="例如：投行部">
-                    </div>
-
                     <div class="form-row">
                         <div class="form-group"><label>主管姓名</label><input type="text" id="fSupervisorName" placeholder="张三"></div>
                         <div class="form-group"><label>主管电话</label><input type="text" id="fSupervisorPhone" placeholder="138-0000-0000"></div>
@@ -827,7 +877,7 @@
                         <button type="button" class="add-sub-btn" onclick="addInvestmentIntent()">＋ 添加投资意向</button>
                     </div>
 
-                    <!-- 委任中 -->
+                    <!-- 委任中（包含承销商、发行时间更新，已移除债券添加） -->
                     <div id="mandateSection" style="display:none; border-top:2px dashed #e2e8f0; padding-top:16px; margin-top:8px;">
                         <h4 style="margin-bottom:8px; color:#2b6cb0;">📌 委任详细信息</h4>
                         <div class="form-group">
@@ -845,23 +895,19 @@
                         <div class="form-group">
                             <label>承销商</label>
                             <div id="underwritersContainer"></div>
-                            <button type="button" class="add-sub-btn" onclick="addUnderwriter()">＋ 添加承销商</button>
+                            <button type="button" class="add-sub-btn" onclick="openUnderwriterModal()">＋ 添加承销商</button>
                         </div>
                         <div class="form-group">
                             <label>预计发行时间更新</label>
                             <div id="mandateUpdatesContainer"></div>
-                            <button type="button" class="add-sub-btn" onclick="addMandateUpdate()">＋ 添加更新</button>
+                            <button type="button" class="add-sub-btn" onclick="openMandateUpdateModal()">＋ 添加更新</button>
                         </div>
+                        <!-- 债券列表仅显示（已移除添加按钮） -->
                         <div class="form-group">
-                            <label>债券列表</label>
+                            <label>债券列表（仅展示）</label>
                             <div id="bondsContainer"></div>
-                            <button type="button" class="add-sub-btn" onclick="addBond()">＋ 添加债券</button>
                         </div>
-                        <div class="form-group">
-                            <label>工作进度更新</label>
-                            <div id="progressUpdatesContainer"></div>
-                            <button type="button" class="add-sub-btn" onclick="addProgressUpdate()">＋ 添加进度更新</button>
-                        </div>
+                        <!-- 工作进度更新（所有状态均显示，此处为委任中的内联，但整体会在详情中统一处理） -->
                     </div>
 
                     <!-- 已完成 -->
@@ -913,15 +959,6 @@
                             <label>汇报文字</label>
                             <textarea id="fSummaryText" rows="4" placeholder="自动生成后您可手动修改"></textarea>
                             <button type="button" class="btn btn-sm btn-outline mt-8" onclick="generateSummary()">🔄 生成表述（基于模板）</button>
-                            <!-- DeepSeek 生成 -->
-                            <div class="deepseek-section">
-                                <div class="form-group">
-                                    <label>DeepSeek API Key (可选，用于AI生成汇报语句)</label>
-                                    <input type="text" id="deepseekApiKey" placeholder="请输入您的 DeepSeek API Key" value="">
-                                </div>
-                                <button type="button" class="btn btn-sm btn-primary" onclick="generateWithDeepSeek()">🚀 使用 DeepSeek 生成汇报语句</button>
-                                <span style="font-size:12px; color:#718096; margin-left:12px;">将根据项目数据生成专业汇报文字</span>
-                            </div>
                         </div>
                     </div>
 
@@ -933,7 +970,8 @@
             </div>
         </div>
 
-        <!-- ===== 投资意向模态框 ===== -->
+        <!-- ===== 子模态框 ===== -->
+        <!-- 投资意向模态框 -->
         <div id="intentModal" class="modal-overlay">
             <div class="modal" style="max-width:560px;">
                 <button class="close-btn" onclick="closeModal('intentModal')">&times;</button>
@@ -985,7 +1023,24 @@
             </div>
         </div>
 
-        <!-- ===== 子模态框（委任更新、债券、承销商、进度、宣传、BOC） ===== -->
+        <!-- 承销商模态框 -->
+        <div id="underwriterModal" class="modal-overlay">
+            <div class="modal" style="max-width:500px;">
+                <button class="close-btn" onclick="closeModal('underwriterModal')">&times;</button>
+                <h2>添加承销商</h2>
+                <form id="underwriterForm" onsubmit="saveUnderwriter(event)">
+                    <input type="hidden" id="underwriterEditIndex" value="-1">
+                    <div class="form-group"><label>角色 <span class="required">*</span></label><select id="fUnderwriterRole" required><option value="JGC">JGC</option><option value="JBR">JBR</option><option value="Co Manager">Co Manager</option></select></div>
+                    <div class="form-group"><label>名称 <span class="required">*</span></label><input type="text" id="fUnderwriterName" placeholder="承销商名称" required></div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('underwriterModal')">取消</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 委任更新模态框 -->
         <div id="updateModal" class="modal-overlay">
             <div class="modal" style="max-width:500px;">
                 <button class="close-btn" onclick="closeModal('updateModal')">&times;</button>
@@ -1016,39 +1071,7 @@
             </div>
         </div>
 
-        <div id="bondModal" class="modal-overlay">
-            <div class="modal" style="max-width:500px;">
-                <button class="close-btn" onclick="closeModal('bondModal')">&times;</button>
-                <h2>添加债券</h2>
-                <form id="bondForm" onsubmit="saveBond(event)">
-                    <input type="hidden" id="bondEditIndex" value="-1">
-                    <div class="form-group"><label>规模 <span class="required">*</span></label><input type="text" id="fBondSize" placeholder="例如：20亿元" required></div>
-                    <div class="form-group"><label>货币 <span class="required">*</span></label><input type="text" id="fBondCurrency" placeholder="CNY / USD" required></div>
-                    <div class="form-group"><label>年期 <span class="required">*</span></label><input type="text" id="fBondTenor" placeholder="例如：3年" required></div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-outline" onclick="closeModal('bondModal')">取消</button>
-                        <button type="submit" class="btn btn-primary">保存</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="underwriterModal" class="modal-overlay">
-            <div class="modal" style="max-width:500px;">
-                <button class="close-btn" onclick="closeModal('underwriterModal')">&times;</button>
-                <h2>添加承销商</h2>
-                <form id="underwriterForm" onsubmit="saveUnderwriter(event)">
-                    <input type="hidden" id="underwriterEditIndex" value="-1">
-                    <div class="form-group"><label>角色 <span class="required">*</span></label><select id="fUnderwriterRole" required><option value="JGC">JGC</option><option value="JBR">JBR</option><option value="Co Manager">Co Manager</option></select></div>
-                    <div class="form-group"><label>名称 <span class="required">*</span></label><input type="text" id="fUnderwriterName" placeholder="承销商名称" required></div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-outline" onclick="closeModal('underwriterModal')">取消</button>
-                        <button type="submit" class="btn btn-primary">保存</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
+        <!-- 进度更新模态框（用于工作进度） -->
         <div id="progressModal" class="modal-overlay">
             <div class="modal" style="max-width:560px;">
                 <button class="close-btn" onclick="closeModal('progressModal')">&times;</button>
@@ -1066,6 +1089,7 @@
             </div>
         </div>
 
+        <!-- 宣传记录模态框 -->
         <div id="promotionModal" class="modal-overlay">
             <div class="modal" style="max-width:560px;">
                 <button class="close-btn" onclick="closeModal('promotionModal')">&times;</button>
@@ -1082,6 +1106,7 @@
             </div>
         </div>
 
+        <!-- BOC投资主体模态框 -->
         <div id="bocModal" class="modal-overlay">
             <div class="modal" style="max-width:560px;">
                 <button class="close-btn" onclick="closeModal('bocModal')">&times;</button>
@@ -1100,7 +1125,7 @@
             </div>
         </div>
 
-        <!-- ===== 通用记录模态框（支持上传文件） ===== -->
+        <!-- 通用记录模态框（保留作为备选，但内联已够用） -->
         <div id="recordModal" class="modal-overlay">
             <div class="modal" style="max-width:560px;">
                 <button class="close-btn" onclick="closeModal('recordModal')">&times;</button>
@@ -1133,7 +1158,7 @@
             </div>
         </div>
 
-        <!-- 详情模态框 -->
+        <!-- 详情模态框（备用） -->
         <div id="detailModal" class="modal-overlay">
             <div class="modal">
                 <button class="close-btn" onclick="closeModal('detailModal')">&times;</button>
@@ -1144,7 +1169,11 @@
 
     </div>
 
-    <script>
+    <!-- ============================================================ -->
+    <!-- JavaScript 部分（下半部分） -->
+    <!-- 由于篇幅，JavaScript 代码将在第二部分提供 -->
+    <!-- 请继续查看第二部分消息 -->
+<script>
         // ================================================================
         // 配置 Supabase（请替换为您自己的）
         // ================================================================
@@ -1556,12 +1585,13 @@
         }
 
         // ================================================================
-        // 详情渲染（完整）
+        // 详情渲染（包含内联记录添加）
         // ================================================================
         function renderDetail(p) {
             const marketing = p.marketingRecords || [];
             const work = p.workRecords || [];
             const meeting = p.meetingMinutes || [];
+            const progress = p.progressUpdates || []; // 工作进度更新（所有状态通用）
             const intents = p.investmentIntents || [];
             const g = p.guaranteeDetails || {};
             const hasGuarantee = g.hasGuarantee || false;
@@ -1597,17 +1627,16 @@
                 <div class="field-row"><span class="label">交叉销售业务</span><span class="value">${escHtml(p.crossSellBusiness)||'-'}</span></div>
             `;
 
-            // 委任详情
+            // 委任详情（包含承销商、更新，无债券添加）
             let mandateHtml = '';
             if (p.status === 'mandated' && p.mandateDetails) {
                 const updates = p.mandateDetails.updates || [];
                 const bonds = p.mandateDetails.bonds || [];
-                const progress = p.mandateDetails.progressUpdates || [];
                 const underwriters = p.mandateDetails.underwriters || [];
                 const bndMap = { 'yes': '是', 'no': '否', 'pending': '待定' };
                 mandateHtml = `
-                    <div class="detail-section" style="margin-bottom:12px;">
-                        <h4>📌 委任详情</h4>
+                    <div style="margin-bottom:12px;">
+                        <h4 style="font-size:14px; font-weight:600; color:#2b6cb0; margin-bottom:8px; border-bottom:1px solid #edf2f7; padding-bottom:6px;">📌 委任详情</h4>
                         <div class="field-row"><span class="label">BnD银行</span><span class="value">${bndMap[p.bndStatus]||'否'}</span></div>
                         ${p.bndStatus === 'yes' ? `<div class="field-row"><span class="label">UWB额度</span><span class="value">${p.uwbLimit !== undefined ? p.uwbLimit + '亿元' : '-'}</span></div>` : ''}
                         <div style="margin:8px 0 4px;"><strong>承销商：</strong></div>
@@ -1626,23 +1655,11 @@
                                 </div>
                             `).join('')
                         }
-                        <div style="margin:12px 0 8px;"><strong>债券列表：</strong></div>
+                        <div style="margin:12px 0 8px;"><strong>债券列表（仅展示）：</strong></div>
                         ${bonds.length===0?'<div style="color:#a0aec0;font-size:13px;">暂无债券</div>':
                             bonds.map(b => `
                                 <div class="record-item" style="border-left-color:#48bb78;">
                                     <div>规模: ${escHtml(b.size)}  |  货币: ${escHtml(b.currency)}  |  年期: ${escHtml(b.tenor)}</div>
-                                </div>
-                            `).join('')
-                        }
-                        <div style="margin:12px 0 8px;"><strong>工作进度更新：</strong></div>
-                        ${progress.length===0?'<div style="color:#a0aec0;font-size:13px;">暂无进度</div>':
-                            progress.map(pr => `
-                                <div class="record-item" style="border-left-color:#9f7aea;">
-                                    <div class="record-meta">
-                                        <span class="record-time">${formatDate(pr.date)}</span>
-                                        ${pr.attachment ? `<span>📎 ${escHtml(pr.attachment)}</span>` : ''}
-                                    </div>
-                                    <div class="record-content">${escHtml(pr.content)}</div>
                                 </div>
                             `).join('')
                         }
@@ -1660,8 +1677,8 @@
                 ).join('；') || '无';
                 const bndMap = { 'yes': '是', 'no': '否', 'pending': '待定' };
                 completionHtml = `
-                    <div class="detail-section" style="margin-bottom:12px;">
-                        <h4>✅ 完成定价信息</h4>
+                    <div style="margin-bottom:12px;">
+                        <h4 style="font-size:14px; font-weight:600; color:#2b6cb0; margin-bottom:8px; border-bottom:1px solid #edf2f7; padding-bottom:6px;">✅ 完成定价信息</h4>
                         <div class="field-row"><span class="label">定价日期</span><span class="value">${formatDate(c.pricingDate)}</span></div>
                         <div class="field-row"><span class="label">定价信息</span><span class="value">${escHtml(c.pricingInfo)||'-'}</span></div>
                         <div class="field-row"><span class="label">是否宣传</span><span class="value">${c.isPromoted ? '是' : '否'}</span></div>
@@ -1685,15 +1702,90 @@
                 `;
             }
 
-            // 会议记录按状态分类
+            // ---- 工作进度更新（所有状态通用） ----
+            let progressHtml = '';
+            if (progress.length > 0) {
+                progressHtml = progress.map(pr => `
+                    <div class="record-item" style="border-left-color:#9f7aea;">
+                        <div class="record-meta">
+                            <span class="record-time">${formatDate(pr.date)}</span>
+                            <button class="record-delete" onclick="deleteProgressUpdate('${p.id}','${pr.date}')">删除</button>
+                        </div>
+                        <div class="record-content">${escHtml(pr.content)}</div>
+                        ${pr.attachment ? `<div style="margin-top:4px; font-size:12px;">📎 <a href="#" onclick="downloadAttachment('${p.id}','progressUpdates','${pr.date}')">${escHtml(pr.attachment.split('|')[0])}</a></div>` : ''}
+                    </div>
+                `).join('');
+            } else {
+                progressHtml = '<div style="color:#a0aec0;font-size:13px;padding:8px 0;">暂无进度更新</div>';
+            }
+
+            // ---- 内联记录添加表单 ----
+            function inlineRecordForm(projectId, type, typeLabel, showAttendees = false, showStatus = false) {
+                const attendeesHtml = showAttendees ?
+                    `<input type="text" id="inline_attendees_${type}" class="record-attendees-input" placeholder="参会人" value="">` :
+                    '';
+                const statusHtml = showStatus ?
+                    `<select id="inline_status_${type}" style="padding:6px 10px; border:2px solid #e2e8f0; border-radius:6px; font-size:13px; background:white;">
+                        <option value="营销中">营销中</option>
+                        <option value="委任中">委任中</option>
+                        <option value="已完成">已完成</option>
+                        <option value="其他">其他</option>
+                    </select>` :
+                    '';
+                return `
+                    <div class="inline-record-form">
+                        <div class="form-row-inline">
+                            <input type="date" id="inline_date_${type}" value="${new Date().toISOString().slice(0,10)}">
+                            ${attendeesHtml}
+                            <textarea id="inline_content_${type}" rows="2" placeholder="输入${typeLabel}内容..." style="flex:1; min-width:150px; padding:6px 10px; border:2px solid #e2e8f0; border-radius:6px; font-size:13px; resize:vertical; font-family:inherit;"></textarea>
+                            <input type="file" id="inline_file_${type}" style="flex:1; min-width:120px; padding:4px; border:2px solid #e2e8f0; border-radius:6px; font-size:12px; background:white;">
+                            ${statusHtml}
+                            <button class="btn btn-success btn-sm" onclick="saveInlineRecord('${projectId}','${type}')">添加</button>
+                        </div>
+                        <div style="font-size:12px; color:#a0aec0; margin-top:4px;">💡 可直接输入文字，或上传文件（PPT/Word等），两者可同时使用</div>
+                    </div>
+                `;
+            }
+
+            // ---- 渲染记录列表 ----
+            function renderRecordList(records, typeLabel, type, showAttendees = false) {
+                if (records.length === 0) {
+                    return '<div style="color:#a0aec0;font-size:13px;padding:8px 0;">暂无记录</div>';
+                }
+                return records.map(r => {
+                    const attendeesHtml = showAttendees && r.attendees ? `👥 ${escHtml(r.attendees)}` : '';
+                    const attachmentHtml = r.attachment ? `<div style="margin-top:4px; font-size:12px;">📎 <a href="#" onclick="downloadAttachment('${p.id}','${type}','${r.date}')">${escHtml(r.attachment.split('|')[0])}</a></div>` :
+                        '';
+                    const statusTag = r.status ? `<span style="font-size:11px; color:#718096; margin-left:8px;">[${escHtml(r.status)}]</span>` :
+                        '';
+                    return `
+                        <div class="record-item">
+                            <div class="record-meta">
+                                <span class="record-time">${formatDate(r.date)}</span>
+                                <span class="record-attendees">${attendeesHtml}${statusTag}</span>
+                                <button class="record-delete" onclick="deleteRecord('${p.id}','${type}','${r.date}')">删除</button>
+                            </div>
+                            <div class="record-content">${escHtml(r.content)}</div>
+                            ${attachmentHtml}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // ---- 各记录区域 ----
+            const marketingListHtml = renderRecordList(marketing, '营销记录', 'marketingRecords', false);
+            const workListHtml = renderRecordList(work, '工作记录', 'workRecords', false);
+            const meetingListHtml = renderRecordList(meeting, '开会纪要', 'meetingMinutes', true);
+
+            // 会议记录按状态分组显示（额外补充）
             function renderMeetingsByStatus(records, statusLabel) {
-                const filtered = records.filter(r => r.status === statusLabel || !r.status);
+                const filtered = records.filter(r => r.status === statusLabel || (!r.status && statusLabel === '其他'));
                 if (filtered.length === 0) return '';
                 return `
-                    <div style="margin-top:8px;">
-                        <strong>${statusLabel} 会议记录</strong>
+                    <div style="margin-top:6px;">
+                        <strong style="font-size:13px; color:#4a5568;">${statusLabel}</strong>
                         ${filtered.map(r => `
-                            <div class="record-item">
+                            <div class="record-item" style="border-left-color:#9f7aea;">
                                 <div class="record-meta">
                                     <span class="record-time">${formatDate(r.date)}</span>
                                     <span class="record-attendees">👥 ${escHtml(r.attendees)||'-'}</span>
@@ -1707,61 +1799,32 @@
                 `;
             }
 
-            const meetingHtml = `
-                <div class="detail-section" style="margin-bottom:12px;">
-                    <h4>📝 开会纪要（按状态分类）</h4>
-                    ${renderMeetingsByStatus(meeting, '营销中')}
-                    ${renderMeetingsByStatus(meeting, '委任中')}
-                    ${renderMeetingsByStatus(meeting, '已完成')}
-                    ${renderMeetingsByStatus(meeting, '其他')}
-                    <button class="add-record-btn" onclick="openRecordModal('${p.id}','meetingMinutes')">＋ 添加开会纪要</button>
-                </div>
-            `;
-
-            const marketingHtml = marketing.map(r => `
-                <div class="record-item">
-                    <div class="record-meta">
-                        <span class="record-time">${formatDate(r.date)}</span>
-                        <button class="record-delete" onclick="deleteRecord('${p.id}','marketingRecords','${r.date}')">删除</button>
-                    </div>
-                    <div class="record-content">${escHtml(r.content)}</div>
-                </div>
-            `).join('');
-
-            const workHtml = work.map(r => `
-                <div class="record-item">
-                    <div class="record-meta">
-                        <span class="record-time">${formatDate(r.date)}</span>
-                        <button class="record-delete" onclick="deleteRecord('${p.id}','workRecords','${r.date}')">删除</button>
-                    </div>
-                    <div class="record-content">${escHtml(r.content)}</div>
-                </div>
-            `).join('');
-
+            // ---- 额度 + BnD预留 ----
             const limitHtml = `
                 <div class="field-row"><span class="label">总额度</span><span class="value">${p.totalLimit !== undefined ? p.totalLimit + ' 亿元' : '-'}</span></div>
                 <div class="field-row"><span class="label">可用额度</span><span class="value">${p.availableLimit !== undefined ? p.availableLimit + ' 亿元' : '-'}</span></div>
             `;
-
             let bndReserveHtml = '';
             if (p.bndStatus === 'yes' && p.availableLimit !== undefined && p.totalLimit !== undefined) {
                 const reserve = p.totalLimit * 0.05;
                 const remaining = p.availableLimit - reserve;
                 if (remaining < 0) {
-                    bndReserveHtml = `<div class="alert-danger" style="padding:8px; margin-top:8px;">⚠️ BnD 预留额度不足：预留 ${reserve.toFixed(2)} 亿元，可用剩余 ${remaining.toFixed(2)} 亿元</div>`;
+                    bndReserveHtml =
+                        `<div class="alert-danger" style="padding:8px; margin-top:8px;">⚠️ BnD 预留额度不足：预留 ${reserve.toFixed(2)} 亿元，可用剩余 ${remaining.toFixed(2)} 亿元</div>`;
                 } else {
-                    bndReserveHtml = `<div style="color:#38a169; margin-top:8px;">✅ BnD 预留额度充足（预留 5% = ${reserve.toFixed(2)} 亿元）</div>`;
+                    bndReserveHtml =
+                        `<div style="color:#38a169; margin-top:8px;">✅ BnD 预留额度充足（预留 5% = ${reserve.toFixed(2)} 亿元）</div>`;
                 }
             }
 
             return `
-                <div class="detail-section" style="margin-bottom:12px;">
-                    <h4>📋 项目基本信息</h4>
+                <!-- 基本信息 -->
+                <div style="margin-bottom:12px;">
+                    <h4 style="font-size:14px; font-weight:600; color:#2b6cb0; margin-bottom:8px; border-bottom:1px solid #edf2f7; padding-bottom:6px;">📋 项目基本信息</h4>
                     <div class="field-row"><span class="label">发行人</span><span class="value">${escHtml(p.issuerName)}</span></div>
                     <div class="field-row"><span class="label">行业</span><span class="value">${escHtml(p.industry)||'-'}</span></div>
                     <div class="field-row"><span class="label">地区</span><span class="value">${escHtml(p.region)||'-'}</span></div>
                     <div class="field-row"><span class="label">前线处室</span><span class="value">${escHtml(p.frontLine)||'-'}</span></div>
-                    <div class="field-row"><span class="label">所属处室</span><span class="value">${escHtml(p.department)||'-'}</span></div>
                     <div class="field-row"><span class="label">主管</span><span class="value">${escHtml(p.supervisorName)||'-'} ${escHtml(p.supervisorPhone)||''}</span></div>
                     <div class="field-row"><span class="label">担保</span><span class="value">${hasGuarantee ? '有' : '无'}</span></div>
                     ${hasGuarantee ? `
@@ -1782,29 +1845,195 @@
                     <div class="field-row"><span class="label">项目状态</span><span class="value">${statusMap(p.status)}</span></div>
                 </div>
 
-                <div class="detail-section" style="margin-bottom:12px;">
-                    <h4>📊 投资意向</h4>
+                <!-- 投资意向 -->
+                <div style="margin-bottom:12px;">
+                    <h4 style="font-size:14px; font-weight:600; color:#2b6cb0; margin-bottom:8px; border-bottom:1px solid #edf2f7; padding-bottom:6px;">📊 投资意向</h4>
                     ${intentHtml}
                 </div>
 
                 ${mandateHtml}
                 ${completionHtml}
 
-                <div class="detail-section" style="margin-bottom:12px;">
-                    <h4>📢 营销记录</h4>
-                    ${marketingHtml || '<div style="color:#a0aec0;font-size:13px;">暂无记录</div>'}
-                    <button class="add-record-btn" onclick="openRecordModal('${p.id}','marketingRecords')">＋ 添加营销记录</button>
+                <!-- 工作进度更新（所有状态） -->
+                <div style="margin-bottom:12px;">
+                    <h4 style="font-size:14px; font-weight:600; color:#2b6cb0; margin-bottom:8px; border-bottom:1px solid #edf2f7; padding-bottom:6px;">📈 工作进度更新</h4>
+                    ${progressHtml}
+                    <div class="inline-record-form">
+                        <div class="form-row-inline">
+                            <input type="date" id="inline_date_progress" value="${new Date().toISOString().slice(0,10)}">
+                            <textarea id="inline_content_progress" rows="2" placeholder="输入进度内容..." style="flex:1; min-width:150px; padding:6px 10px; border:2px solid #e2e8f0; border-radius:6px; font-size:13px; resize:vertical; font-family:inherit;"></textarea>
+                            <input type="file" id="inline_file_progress" style="flex:1; min-width:120px; padding:4px; border:2px solid #e2e8f0; border-radius:6px; font-size:12px; background:white;">
+                            <button class="btn btn-success btn-sm" onclick="saveInlineProgress('${p.id}')">添加进度</button>
+                        </div>
+                        <div style="font-size:12px; color:#a0aec0; margin-top:4px;">💡 可直接输入文字，或上传文件（PPT/Word等），两者可同时使用</div>
+                    </div>
                 </div>
 
-                <div class="detail-section" style="margin-bottom:12px;">
-                    <h4>💼 工作记录</h4>
-                    ${workHtml || '<div style="color:#a0aec0;font-size:13px;">暂无记录</div>'}
-                    <button class="add-record-btn" onclick="openRecordModal('${p.id}','workRecords')">＋ 添加工作记录</button>
+                <!-- 营销记录 -->
+                <div style="margin-bottom:12px;">
+                    <h4 style="font-size:14px; font-weight:600; color:#2b6cb0; margin-bottom:8px; border-bottom:1px solid #edf2f7; padding-bottom:6px;">📢 营销记录</h4>
+                    ${marketingListHtml}
+                    ${inlineRecordForm(p.id, 'marketingRecords', '营销记录', false)}
                 </div>
 
-                ${meetingHtml}
+                <!-- 工作记录 -->
+                <div style="margin-bottom:12px;">
+                    <h4 style="font-size:14px; font-weight:600; color:#2b6cb0; margin-bottom:8px; border-bottom:1px solid #edf2f7; padding-bottom:6px;">💼 工作记录</h4>
+                    ${workListHtml}
+                    ${inlineRecordForm(p.id, 'workRecords', '工作记录', false)}
+                </div>
+
+                <!-- 开会纪要 -->
+                <div style="margin-bottom:12px;">
+                    <h4 style="font-size:14px; font-weight:600; color:#2b6cb0; margin-bottom:8px; border-bottom:1px solid #edf2f7; padding-bottom:6px;">📝 开会纪要</h4>
+                    ${meetingListHtml}
+                    <div style="margin-top:8px;">
+                        <strong style="font-size:13px; color:#4a5568;">按状态分类</strong>
+                        ${renderMeetingsByStatus(meeting, '营销中')}
+                        ${renderMeetingsByStatus(meeting, '委任中')}
+                        ${renderMeetingsByStatus(meeting, '已完成')}
+                        ${renderMeetingsByStatus(meeting, '其他')}
+                    </div>
+                    ${inlineRecordForm(p.id, 'meetingMinutes', '开会纪要', true, true)}
+                </div>
+
+                <!-- 备选模态框入口 -->
+                <div style="margin-top:8px; font-size:12px; color:#a0aec0;">
+                    💡 也可通过点击下方按钮打开对话框添加记录
+                    <button class="btn btn-outline btn-sm" onclick="openRecordModal('${p.id}','marketingRecords')" style="margin-left:8px;">营销</button>
+                    <button class="btn btn-outline btn-sm" onclick="openRecordModal('${p.id}','workRecords')">工作</button>
+                    <button class="btn btn-outline btn-sm" onclick="openRecordModal('${p.id}','meetingMinutes')">会议</button>
+                </div>
             `;
         }
+
+        // ================================================================
+        // 内联记录保存
+        // ================================================================
+        window.saveInlineRecord = function(projectId, type) {
+            const dateEl = document.getElementById(`inline_date_${type}`);
+            const contentEl = document.getElementById(`inline_content_${type}`);
+            const fileEl = document.getElementById(`inline_file_${type}`);
+            const attendeesEl = document.getElementById(`inline_attendees_${type}`);
+            const statusEl = document.getElementById(`inline_status_${type}`);
+
+            const date = dateEl ? dateEl.value : new Date().toISOString().slice(0, 10);
+            const content = contentEl ? contentEl.value.trim() : '';
+            let attendees = attendeesEl ? attendeesEl.value.trim() : '';
+            let status = statusEl ? statusEl.value : '';
+
+            if (!content) {
+                alert('请输入内容');
+                return;
+            }
+
+            let attachment = '';
+            if (fileEl && fileEl.files.length > 0) {
+                const file = fileEl.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    attachment = file.name + '|' + e.target.result;
+                    saveInlineRecordData(projectId, type, date, content, attendees, attachment, status);
+                };
+                reader.readAsDataURL(file);
+                return;
+            } else {
+                saveInlineRecordData(projectId, type, date, content, attendees, '', status);
+            }
+        };
+
+        function saveInlineRecordData(projectId, type, date, content, attendees, attachment, status) {
+            const p = projects.find(x => x.id === projectId);
+            if (!p) {
+                alert('项目不存在');
+                return;
+            }
+            if (!p[type]) p[type] = [];
+            const record = { date, content };
+            if (type === 'meetingMinutes') {
+                if (attendees) record.attendees = attendees;
+                if (attachment) record.attachment = attachment;
+                if (status) record.status = status;
+            } else {
+                if (attachment) record.attachment = attachment;
+            }
+            p[type].push(record);
+            saveProjectToDB(p, p.id).then(() => {
+                loadProjects();
+                const contentEl = document.getElementById(`inline_content_${type}`);
+                const fileEl = document.getElementById(`inline_file_${type}`);
+                const attendeesEl = document.getElementById(`inline_attendees_${type}`);
+                if (contentEl) contentEl.value = '';
+                if (fileEl) fileEl.value = '';
+                if (attendeesEl) attendeesEl.value = '';
+            }).catch(err => {
+                alert('保存记录失败: ' + err.message);
+            });
+        }
+
+        // ---- 工作进度内联保存 ----
+        window.saveInlineProgress = function(projectId) {
+            const dateEl = document.getElementById('inline_date_progress');
+            const contentEl = document.getElementById('inline_content_progress');
+            const fileEl = document.getElementById('inline_file_progress');
+
+            const date = dateEl ? dateEl.value : new Date().toISOString().slice(0, 10);
+            const content = contentEl ? contentEl.value.trim() : '';
+
+            if (!content) {
+                alert('请输入进度内容');
+                return;
+            }
+
+            let attachment = '';
+            if (fileEl && fileEl.files.length > 0) {
+                const file = fileEl.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    attachment = file.name + '|' + e.target.result;
+                    saveProgressData(projectId, date, content, attachment);
+                };
+                reader.readAsDataURL(file);
+                return;
+            } else {
+                saveProgressData(projectId, date, content, '');
+            }
+        };
+
+        function saveProgressData(projectId, date, content, attachment) {
+            const p = projects.find(x => x.id === projectId);
+            if (!p) {
+                alert('项目不存在');
+                return;
+            }
+            if (!p.progressUpdates) p.progressUpdates = [];
+            const record = { date, content };
+            if (attachment) record.attachment = attachment;
+            p.progressUpdates.push(record);
+            saveProjectToDB(p, p.id).then(() => {
+                loadProjects();
+                const contentEl = document.getElementById('inline_content_progress');
+                const fileEl = document.getElementById('inline_file_progress');
+                if (contentEl) contentEl.value = '';
+                if (fileEl) fileEl.value = '';
+            }).catch(err => {
+                alert('保存进度失败: ' + err.message);
+            });
+        }
+
+        // ---- 删除进度 ----
+        window.deleteProgressUpdate = function(projectId, date) {
+            if (!confirm('确定删除此进度更新吗？')) return;
+            const p = projects.find(x => x.id === projectId);
+            if (!p) return;
+            if (!p.progressUpdates) return;
+            p.progressUpdates = p.progressUpdates.filter(r => r.date !== date);
+            saveProjectToDB(p, p.id).then(() => {
+                loadProjects();
+            }).catch(err => {
+                alert('删除进度失败: ' + err.message);
+            });
+        };
 
         // ================================================================
         // 新增/编辑项目
@@ -1847,7 +2076,6 @@
             document.getElementById('fIndustry').value = p.industry || '其他';
             document.getElementById('fRegion').value = p.region || '中国内地';
             document.getElementById('fFrontLine').value = p.frontLine || '';
-            document.getElementById('fDepartment').value = p.department || '';
             document.getElementById('fSupervisorName').value = p.supervisorName || '';
             document.getElementById('fSupervisorPhone').value = p.supervisorPhone || '';
             document.getElementById('fHighlights').value = p.highlights || '';
@@ -1928,7 +2156,6 @@
                     industry: document.getElementById('fIndustry').value,
                     region: document.getElementById('fRegion').value,
                     frontLine: document.getElementById('fFrontLine').value,
-                    department: document.getElementById('fDepartment').value.trim(),
                     supervisorName: document.getElementById('fSupervisorName').value.trim(),
                     supervisorPhone: document.getElementById('fSupervisorPhone').value.trim(),
                     highlights: document.getElementById('fHighlights').value.trim(),
@@ -2087,7 +2314,7 @@
         }
 
         // ================================================================
-        // 投资意向管理（更新）
+        // 投资意向管理
         // ================================================================
         function renderInvestmentIntents() {
             const container = document.getElementById('investmentIntentsContainer');
@@ -2169,43 +2396,290 @@
         }
 
         // ================================================================
-        // 子列表管理（占位，完整实现）
+        // 承销商管理
         // ================================================================
-        function renderSubLists() {
-            // 此处应包含所有子列表渲染，由于篇幅，仅保留占位
-            // 实际项目中会完整实现
+        function openUnderwriterModal() {
+            document.getElementById('underwriterEditIndex').value = '-1';
+            document.getElementById('underwriterForm').reset();
+            openModal('underwriterModal');
+        }
+
+        function editUnderwriter(index) {
+            const u = tempUnderwriters[index];
+            if (!u) return;
+            document.getElementById('underwriterEditIndex').value = index;
+            document.getElementById('fUnderwriterRole').value = u.role || 'JGC';
+            document.getElementById('fUnderwriterName').value = u.name || '';
+            openModal('underwriterModal');
+        }
+
+        function saveUnderwriter(e) {
+            e.preventDefault();
+            const index = parseInt(document.getElementById('underwriterEditIndex').value);
+            const role = document.getElementById('fUnderwriterRole').value;
+            const name = document.getElementById('fUnderwriterName').value.trim();
+            if (!name) { alert('请输入承销商名称'); return; }
+            const uw = { role, name };
+            if (index === -1) {
+                tempUnderwriters.push(uw);
+            } else {
+                tempUnderwriters[index] = uw;
+            }
+            closeModal('underwriterModal');
+            renderSubLists();
+        }
+
+        function deleteUnderwriter(index) {
+            if (!confirm('确定删除此承销商吗？')) return;
+            tempUnderwriters.splice(index, 1);
+            renderSubLists();
         }
 
         // ================================================================
-        // 子项 CRUD（占位）
+        // 委任更新管理
         // ================================================================
-        function addMandateUpdate() {}
-        function editMandateUpdate(index) {}
-        function saveMandateUpdate(e) {}
-        function deleteMandateUpdate(index) {}
-        function addBond() {}
-        function editBond(index) {}
-        function saveBond(e) {}
-        function deleteBond(index) {}
-        function addUnderwriter() {}
-        function editUnderwriter(index) {}
-        function saveUnderwriter(e) {}
-        function deleteUnderwriter(index) {}
-        function addProgressUpdate() {}
-        function editProgressUpdate(index) {}
-        function saveProgressUpdate(e) {}
-        function deleteProgressUpdate(index) {}
-        function addPromotionRecord() {}
-        function editPromotionRecord(index) {}
-        function savePromotionRecord(e) {}
-        function deletePromotionRecord(index) {}
-        function addBocInvestment() {}
-        function editBocInvestment(index) {}
-        function saveBocInvestment(e) {}
-        function deleteBocInvestment(index) {}
+        function openMandateUpdateModal() {
+            document.getElementById('updateEditIndex').value = '-1';
+            document.getElementById('updateForm').reset();
+            openModal('updateModal');
+        }
+
+        function editMandateUpdate(index) {
+            const u = tempUpdates[index];
+            if (!u) return;
+            document.getElementById('updateEditIndex').value = index;
+            document.getElementById('fUpdateDate').value = u.date || '';
+            document.getElementById('fExpectedDate').value = u.expectedDate || '';
+            document.getElementById('fExpectedYear').value = u.expectedYear || '';
+            document.getElementById('fExpectedQuarter').value = u.expectedQuarter || '';
+            document.getElementById('fUpdateReason').value = u.reason || '';
+            openModal('updateModal');
+        }
+
+        function saveMandateUpdate(e) {
+            e.preventDefault();
+            const index = parseInt(document.getElementById('updateEditIndex').value);
+            const date = document.getElementById('fUpdateDate').value;
+            const expectedDate = document.getElementById('fExpectedDate').value;
+            const expectedYear = document.getElementById('fExpectedYear').value;
+            const expectedQuarter = document.getElementById('fExpectedQuarter').value;
+            const reason = document.getElementById('fUpdateReason').value.trim();
+            if (!date || !reason) { alert('请填写更新日期和原因'); return; }
+            if (!expectedDate && !(expectedYear && expectedQuarter)) { alert('请填写预计发行日期或选择年份+季度'); return; }
+            const update = { date, reason };
+            if (expectedDate) update.expectedDate = expectedDate;
+            else { update.expectedYear = expectedYear;
+                update.expectedQuarter = expectedQuarter; }
+            if (index === -1) {
+                tempUpdates.push(update);
+            } else {
+                tempUpdates[index] = update;
+            }
+            closeModal('updateModal');
+            renderSubLists();
+        }
+
+        function deleteMandateUpdate(index) {
+            if (!confirm('确定删除此更新吗？')) return;
+            tempUpdates.splice(index, 1);
+            renderSubLists();
+        }
 
         // ================================================================
-        // 完成信息辅助（包含 DeepSeek 集成）
+        // 债券（仅展示，无添加）
+        // ================================================================
+        // 无 addBond 函数，债券列表从 mandateDetails.bonds 读取
+
+        // ================================================================
+        // 子列表渲染（用于委任中的列表显示）
+        // ================================================================
+        function renderSubLists() {
+            // 承销商列表
+            const uwContainer = document.getElementById('underwritersContainer');
+            if (uwContainer) {
+                if (tempUnderwriters.length === 0) {
+                    uwContainer.innerHTML = '<div style="color:#a0aec0;font-size:13px;">暂无承销商</div>';
+                } else {
+                    uwContainer.innerHTML = tempUnderwriters.map((u, i) => `
+                        <div class="sub-item">
+                            <div class="info">
+                                <strong>${escHtml(u.role)}</strong>: ${escHtml(u.name)}
+                            </div>
+                            <div>
+                                <button class="btn btn-primary btn-xs" onclick="editUnderwriter(${i})">编辑</button>
+                                <button class="btn btn-danger btn-xs" onclick="deleteUnderwriter(${i})">删除</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // 更新列表
+            const updateContainer = document.getElementById('mandateUpdatesContainer');
+            if (updateContainer) {
+                if (tempUpdates.length === 0) {
+                    updateContainer.innerHTML = '<div style="color:#a0aec0;font-size:13px;">暂无更新记录</div>';
+                } else {
+                    updateContainer.innerHTML = tempUpdates.map((u, i) => {
+                        let display = u.expectedDate ? formatDate(u.expectedDate) : (u.expectedYear && u
+                            .expectedQuarter ? u.expectedYear + ' ' + u.expectedQuarter : '-');
+                        return `
+                            <div class="sub-item">
+                                <div class="info">
+                                    <strong>${formatDate(u.date)}</strong> 预计: ${display}<br>
+                                    <span style="font-size:12px;color:#4a5568;">原因: ${escHtml(u.reason)}</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-primary btn-xs" onclick="editMandateUpdate(${i})">编辑</button>
+                                    <button class="btn btn-danger btn-xs" onclick="deleteMandateUpdate(${i})">删除</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // 债券列表（仅显示）
+            const bondContainer = document.getElementById('bondsContainer');
+            if (bondContainer) {
+                if (tempBonds.length === 0) {
+                    bondContainer.innerHTML = '<div style="color:#a0aec0;font-size:13px;">暂无债券</div>';
+                } else {
+                    bondContainer.innerHTML = tempBonds.map(b => `
+                        <div class="sub-item">
+                            <div class="info">
+                                <strong>规模:</strong> ${escHtml(b.size)} &nbsp;|&nbsp; <strong>货币:</strong> ${escHtml(b.currency)} &nbsp;|&nbsp; <strong>年期:</strong> ${escHtml(b.tenor)}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        // ================================================================
+        // 宣传记录、BOC投资、进度更新（模态框版本）
+        // ================================================================
+        function addPromotionRecord() {
+            document.getElementById('promotionEditIndex').value = '-1';
+            document.getElementById('promotionForm').reset();
+            openModal('promotionModal');
+        }
+
+        function editPromotionRecord(index) {
+            const pr = tempPromotionRecords[index];
+            if (!pr) return;
+            document.getElementById('promotionEditIndex').value = index;
+            document.getElementById('fPromotionChannel').value = pr.channel || '新闻';
+            document.getElementById('fPromotionText').value = pr.text || '';
+            openModal('promotionModal');
+        }
+
+        function savePromotionRecord(e) {
+            e.preventDefault();
+            const index = parseInt(document.getElementById('promotionEditIndex').value);
+            const channel = document.getElementById('fPromotionChannel').value;
+            const text = document.getElementById('fPromotionText').value.trim();
+            if (!text) { alert('请填写宣传文字'); return; }
+            const record = { channel, text };
+            if (index === -1) {
+                tempPromotionRecords.push(record);
+            } else {
+                tempPromotionRecords[index] = record;
+            }
+            closeModal('promotionModal');
+            renderSubLists();
+        }
+
+        function deletePromotionRecord(index) {
+            if (!confirm('确定删除此宣传记录吗？')) return;
+            tempPromotionRecords.splice(index, 1);
+            renderSubLists();
+        }
+
+        function addBocInvestment() {
+            document.getElementById('bocEditIndex').value = '-1';
+            document.getElementById('bocForm').reset();
+            openModal('bocModal');
+        }
+
+        function editBocInvestment(index) {
+            const b = tempBocInvestments[index];
+            if (!b) return;
+            document.getElementById('bocEditIndex').value = index;
+            document.getElementById('fBocInvestor').value = b.investor || '';
+            document.getElementById('fBocAmount').value = b.amount || '';
+            document.getElementById('fBocActual').value = b.actual || '';
+            document.getElementById('fBocAlloc').value = b.alloc || '';
+            openModal('bocModal');
+        }
+
+        function saveBocInvestment(e) {
+            e.preventDefault();
+            const index = parseInt(document.getElementById('bocEditIndex').value);
+            const investor = document.getElementById('fBocInvestor').value.trim();
+            const amount = document.getElementById('fBocAmount').value.trim();
+            const actual = document.getElementById('fBocActual').value.trim();
+            const alloc = document.getElementById('fBocAlloc').value.trim();
+            if (!investor) { alert('请输入投资主体'); return; }
+            const boc = { investor, amount, actual, alloc };
+            if (index === -1) {
+                tempBocInvestments.push(boc);
+            } else {
+                tempBocInvestments[index] = boc;
+            }
+            closeModal('bocModal');
+            renderSubLists();
+        }
+
+        function deleteBocInvestment(index) {
+            if (!confirm('确定删除此投资主体吗？')) return;
+            tempBocInvestments.splice(index, 1);
+            renderSubLists();
+        }
+
+        // 进度更新（模态框版本，备用）
+        function addProgressUpdate() {
+            document.getElementById('progressEditIndex').value = '-1';
+            document.getElementById('progressForm').reset();
+            openModal('progressModal');
+        }
+
+        function editProgressUpdate(index) {
+            const pr = tempProgress[index];
+            if (!pr) return;
+            document.getElementById('progressEditIndex').value = index;
+            document.getElementById('fProgressDate').value = pr.date || '';
+            document.getElementById('fProgressContent').value = pr.content || '';
+            openModal('progressModal');
+        }
+
+        function saveProgressUpdate(e) {
+            e.preventDefault();
+            const index = parseInt(document.getElementById('progressEditIndex').value);
+            const date = document.getElementById('fProgressDate').value;
+            const content = document.getElementById('fProgressContent').value.trim();
+            const fileInput = document.getElementById('fProgressFile');
+            let attachment = '';
+            if (fileInput.files.length > 0) attachment = fileInput.files[0].name;
+            if (!date || !content) { alert('请填写日期和内容'); return; }
+            const progress = { date, content, attachment };
+            if (index === -1) {
+                tempProgress.push(progress);
+            } else {
+                tempProgress[index] = progress;
+            }
+            closeModal('progressModal');
+            renderSubLists();
+        }
+
+        function deleteProgressUpdate(index) {
+            if (!confirm('确定删除此进度更新吗？')) return;
+            tempProgress.splice(index, 1);
+            renderSubLists();
+        }
+
+        // ================================================================
+        // 完成信息辅助
         // ================================================================
         function generateSummary() {
             const date = document.getElementById('fPricingDate').value;
@@ -2244,85 +2718,8 @@
             return parts.join('；') + '。';
         }
 
-        // ---- DeepSeek 生成汇报语句 ----
-        function generateWithDeepSeek() {
-            const apiKey = document.getElementById('deepseekApiKey').value.trim();
-            if (!apiKey) {
-                alert('请先输入您的 DeepSeek API Key');
-                return;
-            }
-            // 收集当前项目数据（从表单中获取）
-            const issuerName = document.getElementById('fIssuerName').value.trim() || '未命名项目';
-            const status = document.getElementById('fStatus').value;
-            const statusText = statusMap(status);
-            const totalLimit = document.getElementById('fTotalLimit').value || '未设置';
-            const availableLimit = document.getElementById('fAvailableLimit').value || '未设置';
-            const expectedScale = document.getElementById('fExpectedScale').value || '未设置';
-            const highlights = document.getElementById('fHighlights').value || '无';
-            const recentBond = document.getElementById('fRecentBond').value || '无';
-            const recentMaturity = document.getElementById('fRecentMaturity').value || '无';
-            const externalRating = document.getElementById('fExternalRating').value || '未评级';
-            const bankInternalRating = document.getElementById('fBankRating').value || '未评级';
-            const bndStatus = document.getElementById('fBnDStatus').value;
-            const bndText = bndStatus === 'yes' ? '是' : (bndStatus === 'pending' ? '待定' : '否');
-
-            // 构建 prompt
-            const prompt = `你是一位专业的债券发行项目汇报助手。请根据以下项目信息，为领导撰写一段简洁、专业的项目汇报文字（约200字），重点突出项目亮点、进度和关键数据，语气正式。
-
-项目信息：
-- 发行人：${issuerName}
-- 项目状态：${statusText}
-- 外部评级：${externalRating}
-- 内部评级：${bankInternalRating}
-- 总额度：${totalLimit} 亿元
-- 可用额度：${availableLimit} 亿元
-- 预计发行规模：${expectedScale}
-- 亮点：${highlights}
-- 近期债券发行：${recentBond}
-- 最近到期项目：${recentMaturity}
-- BnD银行：${bndText}
-
-请生成汇报文字。`;
-
-            // 调用 DeepSeek API
-            fetch('https://api.deepseek.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: "deepseek-chat",
-                    messages: [
-                        { role: "system", content: "你是专业的债券发行项目汇报助手。" },
-                        { role: "user", content: prompt }
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 500
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(`API请求失败 (${response.status}): ${text}`); });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.choices && data.choices.length > 0) {
-                    const text = data.choices[0].message.content.trim();
-                    document.getElementById('fSummaryText').value = text;
-                } else {
-                    throw new Error('API 返回数据格式异常');
-                }
-            })
-            .catch(err => {
-                alert('DeepSeek 生成失败: ' + err.message);
-                console.error(err);
-            });
-        }
-
         // ================================================================
-        // 通用记录 CRUD（含文件上传）
+        // 通用记录 CRUD（模态框方式）
         // ================================================================
         function openRecordModal(projectId, type) {
             document.getElementById('recordProjectId').value = projectId;
@@ -2390,6 +2787,8 @@
                 record.attendees = attendees;
                 if (attachment) record.attachment = attachment;
                 if (status) record.status = status;
+            } else {
+                if (attachment) record.attachment = attachment;
             }
             p[type].push(record);
             saveProjectToDB(p, p.id).then(() => {
@@ -2686,26 +3085,27 @@
         window.addInvestmentIntent = addInvestmentIntent;
         window.editInvestmentIntent = editInvestmentIntent;
         window.deleteInvestmentIntent = deleteInvestmentIntent;
-        window.addMandateUpdate = addMandateUpdate;
-        window.editMandateUpdate = editMandateUpdate;
-        window.deleteMandateUpdate = deleteMandateUpdate;
-        window.addBond = addBond;
-        window.editBond = editBond;
-        window.deleteBond = deleteBond;
-        window.addProgressUpdate = addProgressUpdate;
-        window.editProgressUpdate = editProgressUpdate;
-        window.deleteProgressUpdate = deleteProgressUpdate;
-        window.addUnderwriter = addUnderwriter;
+        window.openUnderwriterModal = openUnderwriterModal;
         window.editUnderwriter = editUnderwriter;
+        window.saveUnderwriter = saveUnderwriter;
         window.deleteUnderwriter = deleteUnderwriter;
+        window.openMandateUpdateModal = openMandateUpdateModal;
+        window.editMandateUpdate = editMandateUpdate;
+        window.saveMandateUpdate = saveMandateUpdate;
+        window.deleteMandateUpdate = deleteMandateUpdate;
         window.addPromotionRecord = addPromotionRecord;
         window.editPromotionRecord = editPromotionRecord;
+        window.savePromotionRecord = savePromotionRecord;
         window.deletePromotionRecord = deletePromotionRecord;
         window.addBocInvestment = addBocInvestment;
         window.editBocInvestment = editBocInvestment;
+        window.saveBocInvestment = saveBocInvestment;
         window.deleteBocInvestment = deleteBocInvestment;
+        window.addProgressUpdate = addProgressUpdate;
+        window.editProgressUpdate = editProgressUpdate;
+        window.saveProgressUpdate = saveProgressUpdate;
+        window.deleteProgressUpdate = deleteProgressUpdate;
         window.generateSummary = generateSummary;
-        window.generateWithDeepSeek = generateWithDeepSeek;
         window.openRecordModal = openRecordModal;
         window.saveRecord = saveRecord;
         window.deleteRecord = deleteRecord;
@@ -2713,21 +3113,15 @@
         window.recordBloombergUpload = recordBloombergUpload;
         window.handleExcelUpload = handleExcelUpload;
         window.logout = logout;
+        window.saveInlineRecord = saveInlineRecord;
+        window.saveInlineProgress = saveInlineProgress;
+        window.deleteProgressUpdate = deleteProgressUpdate;
 
         // ================================================================
         // 初始化
         // ================================================================
         window.onload = function() {
             console.log('🚀 页面加载完成');
-            // 恢复保存的 DeepSeek API Key
-            const savedKey = localStorage.getItem('deepseekApiKey');
-            if (savedKey) {
-                document.getElementById('deepseekApiKey').value = savedKey;
-            }
-            // 监听 DeepSeek API Key 变化并保存
-            document.getElementById('deepseekApiKey').addEventListener('change', function() {
-                localStorage.setItem('deepseekApiKey', this.value);
-            });
             initAuth();
         };
     </script>
